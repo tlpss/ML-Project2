@@ -3,7 +3,7 @@ import numpy as np
 class StochasticModelBase:
     """
     BaseClass That models a stochastic stock market with options, evaluated at T timesteps
-    
+
     """
     def __init__(self,N,d,delta_Ts):
         self.N = N
@@ -125,3 +125,14 @@ class MaxCallStochasticModel(StochasticModelBase):
         res[res < 0] = 0
         return res*np.exp(-self.r*self.T)
         
+if __name__ == "__main__":
+        """
+        example usage
+        """
+        s = MaxCallStochasticModel(10,3,[1/12,11/12])
+        s.generate_samples()
+
+        y = s.y
+        X = s.X
+        S = s.S
+        V_T = s.generate_true_V(2)
