@@ -2,17 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def visualise_stock_prices(S,DeltaT):
+def visualise_stock_prices(S,DeltaT,start_time = 0):
     """
-    [summary]
+    Plots stock prices 
 
-    :param S: [description]
-    :type S: [type]
-    :param DeltaT: [description]
-    :type DeltaT: [type]
+    :param S: Stock prices of a bundle of stocks
+    :type S: d x T np 2D array
+    :param DeltaT: array of evaluation moments for stock prices
+    :type DeltaT: list of len T-1
+    :param start_time: time relative to which the DeltaT array times are expressed, defaults to 0
+    :type start_time: int, optional
     """
     d,T = S.shape
-    time = np.zeros(T)
+    time = np.ones(T)*start_time
     print(time)
     time[1:] = [time[i-1] + DeltaT[i-1] for i in range(1,T)]
     print(time)
