@@ -87,13 +87,22 @@ class StochasticModelBase:
         :return: List of tuples (trajectory, V_t(X(j)))
         :rtype: Nx [(dxT), E[f(X)|F_t] (scalar)]
         """
-        if time != self.T:
+        if time == 0:
+            # V_0 == E[f(X)], independant of trajectories
+            # so for each trajectory we add the same value
+            avg_f = self._calculate_f().mean()
+
+            return list(zip(self.X, np.full((self.X.shape[0]),avg_f).flatten())) 
+
+        if time == self.T:
+            # return list of (trajectory, V_T= f(X)) tuples
+            return list(zip(self.X,self._calculate_f()))
+
+        else:
             # requires a nested Monte Carlo Simulation for the unknown part of the trajectory t+1..T,
             #  to estimate the average of f over the remaining part of the trajectory 
             raise NotImplementedError
-        else:
-            # return list of (trajectory, V_T= f(X)) tuples
-            return list(zip(self.X,self._calculate_f()))
+            
 
     
     
@@ -135,4 +144,7 @@ if __name__ == "__main__":
         y = s.y
         X = s.X
         S = s.S
+        print(S)
         V_T = s.generate_true_V(2)
+        v_0 = s.generate_true_V(0)
+        #print(v_0)
