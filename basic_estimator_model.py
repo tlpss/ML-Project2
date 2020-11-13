@@ -17,7 +17,7 @@ class EstimatorModelBase:
     
     def _predict_fX(self, X):
         
-        self.fX = self.gpr.predict(X)
+        return self.gpr.predict(X)
         
 
     def _predict_VXt(self, X, t, aplha, betha, d):
