@@ -84,19 +84,19 @@ class StochasticModelBase:
         :param time: [description]
         :type time: [type]
         :raises NotImplementedError: only V_T is implemented atm
-        :return: List of tuples (trajectory, V_t(X(j)))
-        :rtype: Nx [(dxT), E[f(X)|F_t] (scalar)]
+        :return: List : V_t(X(j)))
+        :rtype: Nx  E[f(X)|F_t] (scalar)
         """
         if time == 0:
             # V_0 == E[f(X)], independant of trajectories
             # so for each trajectory we add the same value
             avg_f = self._calculate_f().mean()
 
-            return list(zip(self.X, np.full((self.X.shape[0]),avg_f).flatten())) 
+            return np.full((self.X.shape[0]),avg_f).flatten()
 
         if time == self.T:
             # return list of (trajectory, V_T= f(X)) tuples
-            return list(zip(self.X,self._calculate_f()))
+            return self._calculate_f()
 
         else:
             # requires a nested Monte Carlo Simulation for the unknown part of the trajectory t+1..T,
