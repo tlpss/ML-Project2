@@ -15,9 +15,8 @@ def visualise_stock_prices(S,DeltaT,start_time = 0):
     """
     d,T = S.shape
     time = np.ones(T)*start_time
-    print(time)
-    time[1:] = [time[i-1] + DeltaT[i-1] for i in range(1,T)]
-    print(time)
+    for i in range(1,len(time)):
+        time[i] = time[i-1] + DeltaT[i-1]
     plt.figure()
 
     for index in range(S.shape[0]): 
