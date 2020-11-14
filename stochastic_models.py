@@ -60,7 +60,7 @@ class StochasticModelBase:
             # (k,k) * (n,k,1) -> (n,k,1) where the tensor is considered as a stack of 2D matrices 
             # hence need to create the newaxis on the Nxd x-slice 
             factor = np.exp(np.matmul(self.sigma_matrix,self.X[:,:,t][:,:,np.newaxis])*np.sqrt(delta)+(self.r - np.sum(np.abs(self.sigma_matrix)**2,axis=1)/2)*delta)
-            self.S[:,:,t+1] = self.S[:,:,t]*factor[:,:,1] 
+            self.S[:,:,t+1] = self.S[:,:,t]*factor[:,:,0] 
     
     def _calculate_y(self):
         """
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         """
         example usage
         """
-        s = MaxCallStochasticModel(10,3,[1/12,11/12])
+        s = MaxCallStochasticModel(10,1,[1/12,11/12])
         s.generate_samples()
 
         y = s.y
