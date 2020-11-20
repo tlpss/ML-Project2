@@ -91,18 +91,10 @@ class SimplePaster(AggregatingBaseClass):
         :param train_size_alpha: relative size of each trainset w.r.t. the original trainset
         :type train_size_alpha: float in range (0,1]
         """
-        super(SimpleBagger,self).__init__(M,predictor)
+        super(SimplePaster,self).__init__(M,predictor)
         self.train_size_alpha = train_size_alpha
         
-    def _split_train_set(self,X,y):
-        n = round(X.shape[0]*self.train_size_alpha)
-        X_list = []
-        y_list = []
-        for i in range(self.M):
-            indices = np.random.choice(X.shape[0],size=n,replace=False)
-            X_list.append(X[indices])
-            y_list.append(y[indices])
-        return X_list, y_list
+
 
 class SimpleBagger(AggregatingBaseClass):
     """
@@ -113,7 +105,15 @@ class SimpleBagger(AggregatingBaseClass):
 
     """
     def __init__(self,M,train_size_alpha,predictor):
-        """
+        """    def _split_train_set(self,X,y):
+        n = round(X.shape[0]*self.train_size_alpha)
+        X_list = []
+        y_list = []
+        for i in range(self.M):
+            indices = np.random.choice(X.shape[0],size=n,replace=False)
+            X_list.append(X[indices])
+            y_list.append(y[indices])
+        return X_list, y_list
         :param train_size_alpha: relative size of each trainset w.r.t. the original trainset
         :type train_size_alpha: float in range (0,1]
         """
@@ -129,3 +129,87 @@ class SimpleBagger(AggregatingBaseClass):
             X_list.append(X[indices])
             y_list.append(y[indices])
         return X_list, y_list
+
+class SoftAggregatingBaseClass(AggregatingBaseClass):
+    """
+    Performs Soft aggregation voting using the explicit sigmas that come with each prediction.
+    Each prediction is weighted using 1/ (sigma + epsilon) and the total is normalized using the sum over these factors. 
+
+    """
+
+    def __init__(self, M, predictor, epsilon = 1e-8):
+        self.epsilon = epsilon
+        super(SoftAggregatingBaseClass,self).__init__(M,predictor)
+    
+    def predict(self,X):
+        print(" soft predict")
+        print(X.shape)
+        predictions = np.zeros((X.shape[0]))
+        sigmas = np.zeros(X.shape[0])
+        for i in range(self.M):
+            mu,sigma = self.predictors[i].predict(X,return_std=True)
+            predictions = predictions + ( mu / (sigma + self.epsilon))
+            sigmas = sigmas + (1/ (sigma + self.epsilon))
+
+        predictions = predictions / sigmas
+        return predictions
+
+class SoftPaster(SoftAggregatingBaseClass):
+    """
+    Pasting Aggregation, all datasets are drawn from the original dataset using replacement between the different sets
+    but not within the sets.
+
+    e.g. [1,2,3,4,5] -> [1,4,5], [1,2,4]
+
+    """
+    def __init__(self,M,train_size_alpha,predictor):
+        """
+        :param train_size_alpha: relative size of each trainset for the M predictors
+        :type train_size_alpha: float
+
+        """
+        super(SoftPaster,self).__init__(M,predictor)
+        self.train_size_alpha = train_size_alpha
+
+
+    def _split_train_set(self,X,y):
+        n = round(X.shape[0]*self.train_size_alpha)
+        X_list = []
+        y_list = []
+        for i in range(self.M):
+            indices = np.random.choice(X.shape[0],size=n,replace=False)
+            X_list.append(X[indices])
+            y_list.append(y[indices])
+        return X_list, y_list
+
+class SoftBagger(SoftAggregatingBaseClass):
+    """
+    Soft Bagging Aggregation, all datasets are drawn from the original dataset using replacement between the different sets
+    AND within the sets. Weighted averaging using the sigmas. 
+
+    e.g. [1,2,3,4,5] -> [1,4,5], [1,3,3]
+
+    """
+    def __init__(self,M,train_size_alpha,predictor):
+        """
+        :param train_size_alpha: relative size of each trainset for the M predictors
+        :type train_size_alpha: float
+
+        """
+        super(SoftBagger,self).__init__(M,predictor)
+        self.train_size_alpha = train_size_alpha
+
+
+    def _split_train_set(self,X,y):
+        n = round(X.shape[0]*self.train_size_alpha)
+        X_list = []
+        y_list = []
+        for i in range(self.M):
+            indices = np.random.choice(X.shape[0],size=n,replace=True)
+            X_list.append(X[indices])
+            y_list.append(y[indices])
+        return X_list, y_list
+
+
+
+    
