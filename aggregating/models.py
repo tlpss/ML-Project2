@@ -36,7 +36,7 @@ class AggregatingBaseClass(BaseEstimator):
         """
         print("fit")
         print(X.shape)
-        self.predictors  = [clone(self.predictor)] *self.M # do this here to make sure we use the latest M value (can be set dynamically)
+        self.predictors  = [clone(self.predictor) for i in range(self.M)] # do this here to make sure we use the latest M value (can be set dynamically)
         X_list,y_list = self._split_train_set(X,y)
         for i in range(self.M):
             self.predictors[i].fit(X_list[i],y_list[i])
