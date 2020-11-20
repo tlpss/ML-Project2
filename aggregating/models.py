@@ -2,33 +2,68 @@ from sklearn.base import clone, BaseEstimator
 import numpy as np 
 
 class AggregatingBaseClass(BaseEstimator):
+    """
+    Base Class for All Ensemble Models
+
+    """
     def __init__(self,M,predictor):
+        """
+
+        :param M: Number of Predictors in the Ensemble
+        :type M: int 
+        :param predictor: the predictor model that is cloned for each instance in the ensemble
+        :type predictor: sklearn.BaseEstimator
+        """
         super().__init__()
         self.M = M
         self.predictor = predictor
         self.predictors = None
         
     def _split_train_set(self,X,y):
+        """
+        placeholder
+        """
         raise NotImplementedError
     
     def fit(self,X,y):
+        """
+        Creates M datasets according to the _split function and trains all M predictors on their dataste
+
+        :param X: Complete train set
+        :type X: np.ndarray(N x (d*T))
+        :param y: labels of the train set
+        :type y: np.ndarray(N x 1 )
+        """
         print("fit")
         print(X.shape)
-        self.predictors  = [clone(self.predictor)] *self.M
+        self.predictors  = [clone(self.predictor)] *self.M # do this here to make sure we use the latest M value (can be set dynamically)
         X_list,y_list = self._split_train_set(X,y)
         for i in range(self.M):
             self.predictors[i].fit(X_list[i],y_list[i])
     
     def predict(self,X):
+        """
+        Predicts the value of the set X using the unweighted average of the M predictors ("hard voting" for regression)
+
+        :param X: set of datapoints for which to make a prediction
+        :type X: np.ndarray(N x (d*T))
+        :return: Predictions 
+        :rtype: np.ndarray(N x 1)
+        """
         print("predict")
         print(X.shape)
         predictions = np.zeros((X.shape[0]))
+        # unweighted average
         for i in range(self.M):
             predictions = predictions + self.predictors[i].predict(X)
         predictions = predictions / self.M 
         return predictions
 
 class SimpleSplitter(AggregatingBaseClass):
+    """
+    Simples case of aggregation, split the trainset evenly over the M predictors
+
+    """
     def __init__(self,M,predictor):
         super(SimpleSplitter,self).__init__(M,predictor)
     
@@ -44,7 +79,18 @@ class SimpleSplitter(AggregatingBaseClass):
         return X_list, y_list
 
 class SimplePaster(AggregatingBaseClass):
+    """
+    Pasting Aggregation, all datasets are drawn from the original dataset using replacement between the different sets
+    but not within the sets.
+
+    e.g. [1,2,3,4,5] -> [1,4,5], [1,2,4]
+
+    """
     def __init__(self,M,train_size_alpha,predictor):
+        """
+        :param train_size_alpha: relative size of each trainset w.r.t. the original trainset
+        :type train_size_alpha: float in range (0,1]
+        """
         super(SimpleBagger,self).__init__(M,predictor)
         self.train_size_alpha = train_size_alpha
         
@@ -59,7 +105,18 @@ class SimplePaster(AggregatingBaseClass):
         return X_list, y_list
 
 class SimpleBagger(AggregatingBaseClass):
+    """
+    Bagging Aggregation, all datasets are drawn from the original dataset using replacement between the different sets
+    AND within the sets.
+
+    e.g. [1,2,3,4,5] -> [1,4,5], [1,3,3]
+
+    """
     def __init__(self,M,train_size_alpha,predictor):
+        """
+        :param train_size_alpha: relative size of each trainset w.r.t. the original trainset
+        :type train_size_alpha: float in range (0,1]
+        """
         super(SimpleBagger,self).__init__(M,predictor)
         self.train_size_alpha = train_size_alpha
      

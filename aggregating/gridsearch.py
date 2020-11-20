@@ -7,6 +7,14 @@ from aggregating.utils import flatten_X, normalized_error_VT
 
 # define your custom log for passing into each thread
 def create_logger(hyperparams,log):
+    """
+    creates async log call
+
+    :param hyperparams: dictionnary of the hyperparams
+    :type hyperparams: dict{str: value}
+    :param log: list to append the results to
+    :type log: list[ [dict.values, results]]
+    """
     def logger(x):
         print(f"logger {hyperparams}, -> {x}")
         result = list(hyperparams.values())
@@ -17,13 +25,31 @@ def create_logger(hyperparams,log):
 
 def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_test, samples_generator):
     """
-    Train given model on given dataset, afterwards create a new test set of size N_test and determine
-    the normalized Error
-    
-    uses:
-    - normalized_error_VT
-    - Flatten_Training_Sample
+    Sets hyperparameters of the model, trains it first and evaluates it afterwards. 
+    Used in GridSearch settings
+
+    :param base_model: model to used
+    :type base_model: sklearn model
+    :param hyperparams: dict of hyperparameters, containing their exact name as key 
+    :type hyperparams: dict{str: value}
+    :param X_train: Training set
+    :type X_train: np.ndarray(N x (d*T))
+    :param y_train: labels of training set
+    :type y_train: np.ndarray( N x 1 )
+    :param d: number of stocks 
+    :type d: integer
+    :param DeltaT: list of the delta Ts between the driver moments
+    :type DeltaT: list of length T
+    :param trials: number of times to evaluate the model
+    :type trials: integer
+    :param N_test: number of samples for each evaluation
+    :type N_test: integer
+    :param samples_generator: stochastic generator used to generate test samples 
+    :type samples_generator: StochasticModelBase
+    :return: list containing the normalized errrors
+    :rtype: list of size trials
     """
+ 
     errors  = []
     try:
         print(f" {hyperparams} -> thread id = {threading.current_thread().ident}")
