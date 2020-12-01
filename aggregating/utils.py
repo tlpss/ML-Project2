@@ -25,7 +25,7 @@ def flatten_X(X):
     Flattens the 2D (d x T) drivers into a 1D array 
     used before prediction using GPR
 
-    this function flattens as follows: x_1,0...x_1,T,x_2,0...x_2,T...,x_d,0...x_d,T
+    this function flattens as follows: x_1,0 ... x_d,0  x_1,1 ... x_d,1  ...  x_1,T ... x_d,T
 
     :param X: set of drivers 
     :type X: np.ndarray( N x d x T )
@@ -34,3 +34,8 @@ def flatten_X(X):
     """
     f = lambda x:x.T.flatten()
     return np.array([f(x) for x in X])
+
+if __name__ == "__main__":
+    x = np.arange(12).reshape((1,3,4))
+
+    print(flatten_X(x))
