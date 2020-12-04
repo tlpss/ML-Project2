@@ -7,7 +7,7 @@ import unittest
 
 from aggregating.gridsearch import evaluate_model, create_logger
 from aggregating.models import SimpleBagger
-from aggregating.utils import flatten_X
+from aggregating.utils import *
 from stochastic_models import *
 
 
@@ -25,6 +25,12 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(flat.shape == (N_train,d*T))
         # flatten d's first check
         self.assertAlmostEqual(X_train[0,2,1], flat[0,5])
+    
+    def test_v_generator(self):
+        self.assertAlmostEqual(generate_V_0(100000,[1/12,11/12],1),0.079,2)
+    
+    def test_set_generator(self):
+        generate_train_set(100,[1/12,11/12],3)
 
 class TestGridSearch(unittest.TestCase):
     def test_gridsearch_w_o_V0_arg(self):
