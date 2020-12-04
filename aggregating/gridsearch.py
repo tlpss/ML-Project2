@@ -23,7 +23,7 @@ def create_logger(hyperparams,log):
 
     return logger
 
-def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_test, samples_generator):
+def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_test, samples_generator,V_0 = None):
     """
     Sets hyperparameters of the model, trains it first and evaluates it afterwards. 
     Used in GridSearch settings
@@ -46,6 +46,8 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
     :type N_test: integer
     :param samples_generator: stochastic generator used to generate test samples 
     :type samples_generator: StochasticModelBase
+    :param V_0: V_0 value, could be obtained using larger set to improve accuracy of the results 
+    :type V_0: optional float
     :return: list containing the normalized errrors
     :rtype: list of size trials
     """
@@ -53,11 +55,14 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
     errors  = []
     try:
         print(f" {hyperparams} -> thread id = {threading.current_thread().ident}")
+        # create the model and set the hyperparams
         model = clone(base_model)
         for k,v in hyperparams.items():
             setattr(model,k,v)
+        # train the model 
         model.fit(X_train,y_train)
 
+        # evaluate the model 
         for trial in range(trials):
             s_test = samples_generator(N_test, d, DeltaT)
             s_test.generate_samples()
@@ -68,12 +73,14 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
             Flattened_X_test = flatten_X(X_test)
 
             V_T = y_test  
-            V_0 = s_test.generate_true_V(0)
-            V_0= V_0.mean()
+            if V_0 is None:
+                V_0 = s_test.generate_true_V(0)
+                V_0= V_0.mean()
             y_hat = model.predict(Flattened_X_test)
 
             error = normalized_error_VT(y_hat,V_T,V_0).item()
             print(f"{hyperparams} , {trial} -> {error}")
+            # add normalized error to the list 
             errors.append(error)
         print(f"{hyperparams} -> {errors}")
         return errors
