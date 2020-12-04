@@ -19,7 +19,7 @@ LOGLEVEL = logging.INFO
 
 '''
 dummpy MPI file to showcase how to run an MPIPool, keeping gridsearches in mind
-
+a
 the goal is to show 
 1) how to pass arguments
 2) how to get the results back 
@@ -29,20 +29,20 @@ how to run this file?
 
 https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html
 
-$ mpiexec -n 1 -usize 5 python mpi/dummy.py 
+$ mpiexec -n 1 -usize 5 python mpi/mpi_dummy.py 
 if your mpi distro allows the -usize keyword
 
-$ mpiexec -n 5 python -m mpi4py.futures mpi/dummy.py
+$ mpiexec -n 5 python -m mpi4py.futures mpi/mpi_dummy.py
 if not (eg MSMPI)
 
 for each of the N processes
 ''' 
 
-def dummy(input):
+def dummy(input,i):
     global counter 
     counter +=1
     logger = generate_logger_MPI(LOGFILE,LOGLEVEL)                                
-    logger.info(f"input={input},counter= {counter}, rank={MPI.COMM_WORLD.Get_rank()}")
+    logger.info(f"input={input},i= {i}, rank={MPI.COMM_WORLD.Get_rank()}")
     logger.info(f"counter value = {counter}")
     return [counter]*2
 
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         futures =  []
         for index,hyperparam in enumerate(hyperparams):
             logger.info(f"starting executor with {hyperparam}")
-            futures.append(executor.submit(dummy, hyperparam))
+            futures.append(executor.submit(dummy, hyperparam,3))
         results  = []
         for future in futures:
             results.append(future.result())
