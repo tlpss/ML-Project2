@@ -25,5 +25,5 @@ def generate_logger_MPI(logfile, level):
 
 def write_results(basename,results,Config,M_grid,alpha_grid):
     res_dict = {'N_train': Config.N_train, 'N_test': Config.N_test,'mgrid': M_grid, 'alpha_grid': alpha_grid, 'errors': results}
-    with open("logs/" + basename + f'{str(datetime.date.today())}.json', 'w') as fp:
+    with open("logs/" + basename + f'{str(datetime.datetime.now().strftime("%Y-%m-%d.%H-%M-%S"))}.json', 'w') as fp:
         json.dump(res_dict, fp)
