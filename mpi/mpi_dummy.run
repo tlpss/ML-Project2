@@ -1,0 +1,10 @@
+#!/bin/bash
+#SBATCH --chdir /scratch/$USER/mpi_dummy-results
+#SBATCH --nodes 2
+#SBATCH --ntasks 4
+#SBATCH --cpus-per-task 2
+#SBATCH --mem-per-cpu=12G
+#SBATCH --time 00:10:00 
+echo STARTING AT `date`
+srun python /home/$USER/ML-Project2/mpi/mpi_dummy.py
+echo FINISHED at `date`
