@@ -46,14 +46,16 @@ def dummy(input,i):
     logger.info(f"counter value = {counter}")
     return [counter]*2
 
-if __name__ == "__main__":
-    
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
 
-    logger = generate_logger_MPI(LOGFILE,LOGLEVEL)                                
 
-    hyperparams = [{'M':1},{'M':3},{'M':5},{'M':7},{'M':9},{'M':11},{'M':13}]
+logger = generate_logger_MPI(LOGFILE,LOGLEVEL)    
+logger.info(f"node with rank {rank} started")                          
+
+hyperparams = [{'M':1},{'M':3},{'M':5},{'M':7},{'M':9},{'M':11},{'M':13}]
+
+if rank == 0:
     with MPIPoolExecutor() as executor:
         futures =  []
         for index,hyperparam in enumerate(hyperparams):
@@ -62,7 +64,7 @@ if __name__ == "__main__":
         results  = []
         for future in futures:
             results.append(future.result())
-    
-    print(results)
+
+        print(results)
 
 
