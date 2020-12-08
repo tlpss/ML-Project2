@@ -26,17 +26,17 @@ class Config:
     """
     container class for config params
     """
-    N_train  = 20
-    N_test = 500
+    N_train  = 5000
+    N_test = 100000
     d = 1
     T = 2
     Delta= [1/12,11/12]
-    trials = 3
+    trials = 2
 
     #Hyperparam Grid
 
-    M_grid = [1,2]
-    alpha_grid = [0.2,0.3]
+    M_grid = [1,3,5,7,9,11]
+    alpha_grid = [0.2,0.3,0.5,0.7]
 
 def evaluate_model_MPI(*args,**kwargs):
     """
