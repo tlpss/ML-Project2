@@ -1,7 +1,7 @@
 # add modules to path
 import os 
 import sys         
-module_path = os.path.abspath(os.path.join('...'))
+module_path = os.path.join(os.path.dirname(__file__), '..')
 sys.path.append(module_path)
 
 import logging 
