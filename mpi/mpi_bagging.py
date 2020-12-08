@@ -20,7 +20,7 @@ from stochastic_models import MaxCallStochasticModel
 
 LOGFILE = "logs/bagging.log"
 LOGLEVEL = logging.INFO
-WRITEBACK = False
+WRITEBACK = True
  
 class Config:
     """
@@ -33,6 +33,10 @@ class Config:
     Delta= [1/12,11/12]
     trials = 3
 
+    #Hyperparam Grid
+
+    M_grid = [1,2]
+    alpha_grid = [0.2,0.3]
 
 def evaluate_model_MPI(*args,**kwargs):
     """
@@ -46,21 +50,22 @@ def evaluate_model_MPI(*args,**kwargs):
     logger = generate_logger_MPI(LOGFILE,LOGLEVEL)
     kwargs["logger"] = logger
     return evaluate_model(*args,**kwargs)
-    
 
-if __name__ == "__main__":
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+
+
+logger = generate_logger_MPI(LOGFILE,LOGLEVEL)    
+logger.info(f"node with rank {rank} started")   
+
+if rank == 0:
     """
     executed by main MPI process 
     
     mpiexec -n <num_nodes> python -m mpi4py.futures mpi\mpi_bagging.py
-    will create 1 dispatcher node and num_node-1 workers for the pool
+    will create 1 dispatcher node with rank 0 and num_node-1 workers for the pool
 
     """
-    ## define grid
-    #M_grid = [1,4,7,10,13,16]
-    #alpha_grid = [0.05,0.2,0.3,0.4,0.6]
-    M_grid = [1,2]
-    alpha_grid = [0.2,0.3]
 
     ## generate model
     gpr = create_GPR(Config.N_train)
@@ -80,8 +85,8 @@ if __name__ == "__main__":
     with MPIPoolExecutor() as executor:
         futures =  []
         # evaluate model for all points in grid by creating new mpi node
-        for m in M_grid:
-            for alpha in alpha_grid:
+        for m in Config.M_grid:
+            for alpha in Config.alpha_grid:
                 hyperparams= {'M':m, 'train_size_alpha':alpha}
                 logger.info(f"starting evaluation for {hyperparams}")
                 future = executor.submit(evaluate_model_MPI, model,hyperparams,X_train,y_train,Config.d,
@@ -94,6 +99,6 @@ if __name__ == "__main__":
     results.sort(key = lambda x: (x[0],x[1]))
     
     if WRITEBACK:
-        write_results("mpi_bagging",results,Config,M_grid,alpha_grid)
+        write_results("mpi_bagging",results,Config,Config.M_grid,Config.alpha_grid)
     print(results)
 

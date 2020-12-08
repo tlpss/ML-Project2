@@ -21,6 +21,7 @@ TODO
 - create a virtualenv using the `create_scitas_env.sh` file, this will build the `mpi4py` library using a specific chain of compiler(gcc), mpi flavour (mvapich) and the system configuration of the nodes 
 - clone the project 
 - change the username in the `.run`files to your own username 
+- activate the environment
 - test if the config is working by running `sbatch -p debug mpi_dummmy.run` from the mpi folder.
 - monitor if your job executes as expected with `Sjob <jobID>` and the queue with `squeue -u <username>`
 - verify  if the `<jobID>.out` file contains no errors
