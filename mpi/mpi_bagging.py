@@ -74,6 +74,7 @@ if rank == 0:
     ## generate Training set & V_0
     X_train, y_train = generate_train_set(Config.N_train, Config.Delta,Config.d)
     V_0 = generate_V_0(100000,Config.Delta, Config.d)
+    logger.info(f"V_0 = {V_0}")
 
         
 
