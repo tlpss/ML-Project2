@@ -31,17 +31,17 @@ class Config:
     """
     container class for config params
     """
-    N_train  = 200
-    N_test = 400
-    d = 6
+    N_train  = 5000
+    N_test = 50000
+    d = 1
     T = 2
     Delta= [1/12,11/12]
     trials = 2
 
     #Hyperparam Grid
 
-    M_grid = [2,3]
-    alpha_grid = [0.2]
+    M_grid = [1,3,5,7,9]
+    alpha_grid = [0.3]
 
 class DataContainer:
     """
@@ -155,7 +155,7 @@ if rank == 0:
         for index,prediction in enumerate(result[2]):
             error = normalized_error_VT(prediction,DataContainer.y_test_list[index],V_0)
             errors.append(error)
-    normalized_error_results.append([result[0],result[1],errors])
+        normalized_error_results.append([result[0],result[1],errors])
 
     print(normalized_error_results)
     if WRITEBACK:

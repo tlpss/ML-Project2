@@ -81,5 +81,5 @@ class TestGridSearch(unittest.TestCase):
         errors = evaluate_model(model,{'M':5, 'train_size_alpha':0.2},flatten_X(X_train),y_train,d, [1/12,11/12],2,N_test,MaxCallStochasticModel,V_0=V_0)
         self.assertTrue(len(errors) ==2)
         self.assertTrue(errors[0]>0)
-        self.assertTrue(errors[0] < 0.4)
+        self.assertTrue(errors[0] < 0.8)
 
