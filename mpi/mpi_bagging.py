@@ -25,23 +25,23 @@ np.random.seed(2020)
 
 LOGFILE = "logs/bagging.log"
 LOGLEVEL = logging.DEBUG
-WRITEBACK = False
+WRITEBACK = True
  
 class Config:
     """
     container class for config params
     """
     N_train  = 20000
-    N_test = 50000
+    N_test = 100000
     d = 6
     T = 2
     Delta= [1/12,11/12]
-    trials = 4
+    trials = 2
 
     #Hyperparam Grid
 
     M_grid = [1,4,7,10,13,16,19]
-    alpha_grid = [0.4]
+    alpha_grid = [0.5]
 
 
 class DataContainer:
