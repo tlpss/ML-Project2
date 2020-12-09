@@ -1,5 +1,4 @@
-# ML-Project2 [![Build Status](https://travis-ci.org/tlpss/ML-Project2.svg?branch=master)](https://travis-ci.org/tlpss/ML-Project2) 
-[![YourActionName Actions Status](https://github.com/tlpss/ML-Project2/workflows/unittest/badge.svg)](https://github.com/tlpss/ML-project2/actions)
+# ML-Project2  [![YourActionName Actions Status](https://github.com/tlpss/ML-Project2/workflows/unittest/badge.svg)](https://github.com/tlpss/ML-project2/actions)
 Project 2 of ML course @ EPFL - Ensemble Kernel Methods for Portfolio Valuation
 
 ## Project Description 
