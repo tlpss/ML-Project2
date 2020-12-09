@@ -1,5 +1,5 @@
     """
-    MPI file that performs a gridsearch for soft bagging. 
+    MPI gridsearch for soft bagging. 
     Naive implementation that does not parallellize the ensemble itself, only the different hyperparam evaluations
 
     run using the .run file on SCITAS or locally using 

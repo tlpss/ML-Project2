@@ -1,3 +1,7 @@
+"""
+Parallelized MPI gridsearch for SOFT BAGGING
+"""
+
 # add modules to path
 import os 
 import sys         
@@ -20,16 +24,16 @@ from stochastic_models import MaxCallStochasticModel
 
 
 LOGFILE = "logs/bagging.log"
-LOGLEVEL = logging.DEBUG
-WRITEBACK = False
+LOGLEVEL = logging.INFO
+WRITEBACK = True
  
 class Config:
     """
     container class for config params
     """
-    N_train  = 20
-    N_test = 5
-    d = 3
+    N_train  = 200
+    N_test = 400
+    d = 6
     T = 2
     Delta= [1/12,11/12]
     trials = 2
@@ -50,7 +54,7 @@ class DataContainer:
 
 
 
-def train_and_evaluate_wrapper(model, train_indices):
+def train_and_evaluate_wrapper(model, train_indices,alpha,m,i):
     """
     wrapper around the evaluate_model to allow for creating a logger with the MPI rank
 
@@ -60,7 +64,7 @@ def train_and_evaluate_wrapper(model, train_indices):
     :rtype: list(float)
     """
     logger = generate_logger_MPI(LOGFILE,LOGLEVEL)
-    logger.debug("executing train_evaluate")
+    logger.info(f"executing{i}-th train_evaluate for M,alpha= {m},{alpha} ")
 
     X_train, y_train = DataContainer.X_train[train_indices],DataContainer.y_train[train_indices]
     return train_and_evaluate(model, X_train, y_train, DataContainer.X_test_list)
@@ -74,7 +78,7 @@ logger.info(f"node with rank {rank} started")
 
 ## let the main task create the train & testsets
 if rank == 0:
-    logger.debug(f"creating train & testsets")
+    logger.info(f"creating train & testsets")
     DataContainer.X_train, DataContainer.y_train = generate_train_set(Config.N_train, Config.Delta,Config.d)
     DataContainer.X_test_list, DataContainer.y_test_list = generate_test_sets(Config.trials, Config.N_test,Config.Delta, Config.d)
 
@@ -112,16 +116,16 @@ if rank == 0:
             for alpha in Config.alpha_grid:
                 hyperparams= {'M':m, 'train_size_alpha':alpha}
                 logger.info(f"starting evaluations for {hyperparams}")
-                # generate index sets
+                # generate index sets for the ensemble
                 indices_list  = generate_bagging_train_indices(Config.N_train,alpha,m)
                 predictor_futures = []
 
                 for i in range(m):
-                    # clone base model 
+                    # clone base model for each member of the ensemble
                     gpr = clone(base_gpr)
-                    # submit job
+                    # submit job 
                     logger.debug(f"starting {i}-th model of the ensemble")
-                    future = executor.submit(train_and_evaluate_wrapper, gpr,indices_list[i]) #[mu_list,sigma_list] each of len trials
+                    future = executor.submit(train_and_evaluate_wrapper, gpr,indices_list[i],alpha, m, i) #[mu_list,sigma_list] each of len trials
                     predictor_futures.append(future) 
 
                 futures.append([m,alpha,predictor_futures]) # M* [mu_list,sigma_list] each of len trials
@@ -135,16 +139,25 @@ if rank == 0:
     results.sort(key = lambda x: (x[0],x[1]))
 
 
-    #convert into a single prediction
+    # combine the ensemble predictions into a single prediction for each trial of each hyperparam setting
+    # SOFT BAGGING
     predictions = []
     for result in results:
         predictor_results = result[2] #M* [mu_list,sigma_list] each of len trials
         bagging_predictions = trials_soft_prediction(predictor_results, Config.trials)
         predictions.append([result[0],result[1],bagging_predictions])
 
-    ## compute the actual error
-    print(f"final predictions = {predictions}")
+    ## compute the normalized error for all hyperparam runs & all trials
+    V_0  = generate_V_0(100000,Config.Delta,Config.d)
+    normalized_error_results = []
+    for result in predictions:
+        errors  = []
+        for index,prediction in enumerate(result[2]):
+            error = normalized_error_VT(prediction,DataContainer.y_test_list[index],V_0)
+            errors.append(error)
+    normalized_error_results.append([result[0],result[1],errors])
 
+    print(normalized_error_results)
     if WRITEBACK:
-        write_results("mpi_bagging",results,Config)
+        write_results("mpi_bagging",normalized_error_results,Config)
 
