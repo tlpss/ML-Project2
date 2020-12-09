@@ -21,26 +21,26 @@ from aggregating.utils import normalized_error_VT, flatten_X, generate_V_0, gene
 from mpi.utils import generate_logger_MPI, write_results, generate_bagging_train_indices,train_and_evaluate, generate_test_sets, trials_soft_prediction
 from stochastic_models import MaxCallStochasticModel
 
-
+np.random.seed(2020)
 
 LOGFILE = "logs/bagging.log"
-LOGLEVEL = logging.INFO
-WRITEBACK = True
+LOGLEVEL = logging.DEBUG
+WRITEBACK = False
  
 class Config:
     """
     container class for config params
     """
-    N_train  = 500
+    N_train  = 100
     N_test = 5000
-    d = 1
+    d = 2
     T = 2
     Delta= [1/12,11/12]
-    trials = 2
+    trials = 5
 
     #Hyperparam Grid
 
-    M_grid = [1,3,5,7,9]
+    M_grid = [2]
     alpha_grid = [0.3]
 
 class DataContainer:
@@ -49,8 +49,8 @@ class DataContainer:
     """
     X_train  = np.empty((Config.N_train,Config.d*Config.T)) 
     y_train = np.empty((Config.N_train,1))
-    X_test_list = [np.empty((Config.N_test,Config.d*Config.T))] * Config.trials
-    y_test_list = [np.empty((Config.N_test,1))] * Config.trials
+    X_test_list = np.empty((Config.trials,Config.N_test,Config.d*Config.T))
+    y_test_list = np.empty((Config.trials,Config.N_test,1))
 
 
 
@@ -65,7 +65,6 @@ def train_and_evaluate_wrapper(model, train_indices,alpha,m,i):
     """
     logger = generate_logger_MPI(LOGFILE,LOGLEVEL)
     logger.info(f"executing{i}-th train_evaluate for M,alpha= {m},{alpha} ")
-
     X_train, y_train = DataContainer.X_train[train_indices],DataContainer.y_train[train_indices]
     return train_and_evaluate(model, X_train, y_train, DataContainer.X_test_list)
 
@@ -91,19 +90,14 @@ if rank == 0:
 # this feature is not documented in the documentation, but the source code clearly indicates it is present
 xtrain_req = comm.Ibcast(DataContainer.X_train, root = 0)
 ytrain_req = comm.Ibcast(DataContainer.y_train, root = 0)
-
-xtest_list_req = []
-for i in range(len(DataContainer.X_test_list)):
-    req = comm.Ibcast(DataContainer.X_test_list[i],root = 0)
-    xtest_list_req.append(req)
+ytest_req = comm.Ibcast(DataContainer.X_test_list,root = 0)
 
 if rank > 0:
     # want the broadcast to be blocking since we need the data before continuing
     logger.debug(f"waiting for broadcasts")
     xtrain_req.Wait()
     ytrain_req.Wait()
-    for req in xtest_list_req:
-        req.Wait()
+    ytest_req.Wait()
 
 
 logger.debug(f"X_test_list= {DataContainer.X_test_list}")
@@ -155,12 +149,11 @@ if rank == 0:
             results.append([future[0],future[1],predictor_results])
     results.sort(key = lambda x: (x[0],x[1]))
 
-
     # combine the ensemble predictions into a single prediction for each trial of each hyperparam setting
     # SOFT BAGGING
     predictions = []
     for result in results:
-        predictor_results = result[2] #M* [mu_list,sigma_list] each of len trials
+        predictor_results = result[2] #M* [(m_ij,s_ij)] each of len trials
         bagging_predictions = trials_soft_prediction(predictor_results, Config.trials)
         predictions.append([result[0],result[1],bagging_predictions])
 

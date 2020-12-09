@@ -73,6 +73,9 @@ def generate_train_set(N,Delta,d):
     s_train.generate_samples()
     y_train = s_train.y
     X_train = flatten_X(s_train.X)
+    V_0 = s_train.generate_true_V(0)
+    V_0 = V_0.mean()
+    print(f"V_0 of the set = {V_0}")
     return X_train, y_train
 
 def create_GPR(N_train):

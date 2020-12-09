@@ -40,13 +40,17 @@ class TestMPIUtils(unittest.TestCase):
         s_test = MaxCallStochasticModel(20,self.d,[1/12,11/12])
         s_test.generate_samples()
 
-        X_test = [flatten_X(s_test.X),flatten_X(s_test.X)]
+        s_test2 = MaxCallStochasticModel(20,self.d,[1/12,11/12])
+        s_test2.generate_samples()
+
+        X_test = [flatten_X(s_test.X),flatten_X(s_test2.X)]
 
         mu_list, sigma_list  = train_and_evaluate(gpr,self.X_train,self.y_train,X_test)
         self.assertEqual(len(mu_list),len(X_test))
         self.assertEqual(len(sigma_list),len(X_test))
         self.assertEqual(mu_list[0].shape,(X_test[0].shape[0],))
         self.assertEqual(sigma_list[0].shape,(X_test[0].shape[0],))
+        self.assertTrue((mu_list[0]-mu_list[1]).all())
 
 
 

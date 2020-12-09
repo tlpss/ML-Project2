@@ -56,7 +56,7 @@ def generate_bagging_train_indices(N_train,alpha,M):
 def generate_test_sets(trials, N_test,Delta, d):
     """
     generate #trials test sets of given dimensions using the util func in aggregating
-    :return: X_test_lists, y_test_list of specified dimensions
+    :return: X_test_lists, y_test_list of specified dimensions; stacked into a single numpy array (trials, N,Delta*d / 1)
     """
     X_test_list = []
     y_test_list = []
@@ -66,7 +66,7 @@ def generate_test_sets(trials, N_test,Delta, d):
         X_test_list.append(X_test)
         y_test_list.append(y_test)
 
-    return X_test_list, y_test_list
+    return np.stack(X_test_list,axis=0), np.stack(y_test_list,axis=0)
 
 
     
@@ -95,7 +95,6 @@ def train_and_evaluate(model, X_train, y_train, X_test_list):
     for x_test in X_test_list:
         mu, sigma = model.predict(x_test,return_std=True)
         result_list.append((mu,sigma))
-
     return result_list
 
 def soft_prediction(predictor_lists,epsilon = 1e-10):
