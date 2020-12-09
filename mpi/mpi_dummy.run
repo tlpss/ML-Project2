@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH --chdir /scratch/lips/ML-Project2/
+#SBATCH --nodes 2
+#SBATCH --ntasks 4
+#SBATCH --cpus-per-task 2
+#SBATCH --mem-per-cpu 2G
+#SBATCH --time 00:05:00 
+echo STARTING AT `date`
+export MV2_ENABLE_AFFINITY=0 # disable affinity to make each task use seperate cpus
+srun python -m mpi4py.futures /scratch/lips/ML-Project2/mpi/mpi_dummy.py
+echo FINISHED at `date`

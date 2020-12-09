@@ -1,4 +1,9 @@
 import numpy as np 
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import WhiteKernel, RBF
+
+from stochastic_models import MaxCallStochasticModel
+
 def normalized_error_VT(y_hat,y,V_0):
     """
     Calculate normalized error of predictions w.r.t true values,
@@ -34,6 +39,81 @@ def flatten_X(X):
     """
     f = lambda x:x.T.flatten()
     return np.array([f(x) for x in X])
+
+def generate_V_0(N,Delta,d):
+    """
+    generate V_0 using dataset of specified shape
+
+    :param N: [description]
+    :type N: [type]
+    :param Delta: [description]
+    :type Delta: [type]
+    :param d: [description]
+    :type d: [type]
+    :return: V_0^
+    :rtype: float
+    """
+    s_v = MaxCallStochasticModel(N,d,Delta)
+    s_v.generate_samples()
+    V_0 = s_v.generate_true_V(0)
+    V_0 = V_0.mean()
+    return V_0
+
+def generate_train_set(N,Delta,d):
+    """
+    generate trainset with specified shape
+
+    :param N: [description]
+    :param Delta: [description]
+    :param d: [description]
+    :return: X_train, y_train
+    :rtype: np.ndarray, np.ndarray
+    """
+    s_train = MaxCallStochasticModel(N,d,Delta)
+    s_train.generate_samples()
+    y_train = s_train.y
+    X_train = flatten_X(s_train.X)
+    V_0 = s_train.generate_true_V(0)
+    V_0 = V_0.mean()
+    print(f"V_0 of the set = {V_0}")
+    return X_train, y_train
+
+def create_GPR(N_train):
+    """
+    creates a GPR with the standard kernel used in the project
+
+    :param N_train: [description]
+    :type N_train: [type]
+    :return: gpr
+    :rtype: sklearn.GPR
+    """
+    lambda_range = (N_train*1e-9 , N_train*1e-3)
+    alpha_range = (8.3*1e-5, 0.83)
+    length_scale = np.sort(1/np.sqrt((2*alpha_range[0], 2*alpha_range[1])))
+
+    #kernel
+    kernel = RBF(length_scale= (length_scale[0] + length_scale[1])/2, length_scale_bounds=length_scale) \
+            + WhiteKernel(noise_level= (lambda_range[0] + lambda_range[1])/2 , noise_level_bounds=lambda_range)
+
+    gpr = GaussianProcessRegressor(kernel, copy_X_train=False)      
+    return gpr
+
+def memory_efficient_predict(model, X, max_size = 20000):
+    assert isinstance(model, GaussianProcessRegressor)
+    if X.shape[0] > max_size:
+        n = int(X.shape[0]/max_size)
+        datasets = np.array_split(X,n)
+        mu_list = []
+        sigma_list = []
+        for dataset in datasets:
+            mu,sigma = model.predict(dataset, return_std = True)
+            mu_list.append(mu)
+            sigma_list.append(sigma)
+        mu = np.concatenate(mu_list)
+        sigma = np.concatenate(sigma_list)
+        return mu, sigma
+    else: 
+        return model.predict(X, return_std = True)
 
 if __name__ == "__main__":
     x = np.arange(12).reshape((1,3,4))

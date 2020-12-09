@@ -5,7 +5,7 @@ import traceback
 
 from aggregating.utils import flatten_X, normalized_error_VT
 
-# define your custom log for passing into each thread
+# define  custom log for passing into each thread for a threadpool
 def create_logger(hyperparams,log):
     """
     creates async log call
@@ -23,7 +23,7 @@ def create_logger(hyperparams,log):
 
     return logger
 
-def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_test, samples_generator,V_0 = None):
+def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_test, samples_generator,V_0 = None, logger = None):
     """
     Sets hyperparameters of the model, trains it first and evaluates it afterwards. 
     Used in GridSearch settings
@@ -48,13 +48,17 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
     :type samples_generator: StochasticModelBase
     :param V_0: V_0 value, could be obtained using larger set to improve accuracy of the results 
     :type V_0: optional float
+    :param logger: Optional, logger for debug information 
     :return: list containing the normalized errrors
     :rtype: list of size trials
     """
  
     errors  = []
     try:
-        print(f" {hyperparams} -> thread id = {threading.current_thread().ident}")
+        if logger:
+            logger.debug(f" {hyperparams} -> thread id = {threading.current_thread().ident}")
+        else:
+            print(f" {hyperparams} -> thread id = {threading.current_thread().ident}")
         # create the model and set the hyperparams
         model = clone(base_model)
         for k,v in hyperparams.items():
@@ -79,13 +83,21 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
             y_hat = model.predict(Flattened_X_test)
 
             error = normalized_error_VT(y_hat,V_T,V_0).item()
-            print(f"{hyperparams} , {trial} -> {error}")
+            if logger:
+                logger.debug(f"{hyperparams} , {trial} -> {error}")
+            else:
+                print(f"{hyperparams} , {trial} -> {error}")
             # add normalized error to the list 
             errors.append(error)
-        print(f"{hyperparams} -> {errors}")
+        if logger:
+            logger.info(f"{hyperparams} -> {errors}")
+        else:   
+            print(f"{hyperparams} -> {errors}")
         return errors
 
     except Exception as e:
-        print(hyperparams)
-        traceback.print_exc()
+        if logger:
+            logger.warn(traceback.format_exc())
+        else:
+            traceback.print_exc()
         return None
