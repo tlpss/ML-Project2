@@ -1,3 +1,4 @@
+from aggregating.utils import memory_efficient_predict
 from sklearn.base import clone, BaseEstimator
 import numpy as np 
 
@@ -55,7 +56,8 @@ class AggregatingBaseClass(BaseEstimator):
         predictions = np.zeros((X.shape[0]))
         # unweighted average
         for i in range(self.M):
-            predictions = predictions + self.predictors[i].predict(X)
+            predictions = predictions +  memory_efficient_predict(self.predictors[i],X,max_size = 10000)[0]
+
         predictions = predictions / self.M 
         return predictions
 
@@ -147,7 +149,7 @@ class SoftAggregatingBaseClass(AggregatingBaseClass):
         predictions = np.zeros((X.shape[0]))
         sigmas = np.zeros(X.shape[0])
         for i in range(self.M):
-            mu,sigma = self.predictors[i].predict(X,return_std=True)
+            mu,sigma = memory_efficient_predict(self.predictors[i],X,max_size = 10000)
             predictions = predictions + ( mu / (sigma + self.epsilon))
             sigmas = sigmas + (1/ (sigma + self.epsilon))
 

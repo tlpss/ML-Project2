@@ -98,6 +98,22 @@ def create_GPR(N_train):
     gpr = GaussianProcessRegressor(kernel, copy_X_train=False)      
     return gpr
 
+def memory_efficient_predict(model, X, max_size = 20000):
+    assert isinstance(model, GaussianProcessRegressor)
+    if X.shape[0] > max_size:
+        n = int(X.shape[0]/max_size)
+        datasets = np.array_split(X,n)
+        mu_list = []
+        sigma_list = []
+        for dataset in datasets:
+            mu,sigma = model.predict(dataset, return_std = True)
+            mu_list.append(mu)
+            sigma_list.append(sigma)
+        mu = np.concatenate(mu_list)
+        sigma = np.concatenate(sigma_list)
+        return mu, sigma
+    else: 
+        return model.predict(X, return_std = True)
 
 if __name__ == "__main__":
     x = np.arange(12).reshape((1,3,4))
