@@ -63,7 +63,7 @@ def train_and_evaluate_wrapper(model, train_indices,alpha,m,i):
     :return: evaluate_model(*args,**kwargs)
     :rtype: list(float)
     """
-    logger = generate_logger_MPI(LOGFILE,LOGLEVEL)
+    logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)
     logger.info(f"executing{i}-th train_evaluate for M,alpha= {m},{alpha} ")
     X_train, y_train = DataContainer.X_train[train_indices],DataContainer.y_train[train_indices]
     return train_and_evaluate(model, X_train, y_train, DataContainer.X_test_list)
@@ -73,7 +73,7 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-logger = generate_logger_MPI(LOGFILE,LOGLEVEL)    
+logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)    
 logger.info(f"node with rank {rank}/{size} started")  
 
 ## let the main task create the train & testsets
@@ -116,7 +116,7 @@ if rank == 0:
     base_gpr = create_GPR(Config.N_train)
 
     ## create logger
-    logger = generate_logger_MPI(LOGFILE,LOGLEVEL)                                
+    logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)                                
 
     ## MPI execute
     results = []

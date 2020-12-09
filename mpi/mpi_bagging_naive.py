@@ -55,15 +55,16 @@ def evaluate_model_MPI(*args,**kwargs):
     :return: evaluate_model(*args,**kwargs)
     :rtype: list(float)
     """
-    logger = generate_logger_MPI(LOGFILE,LOGLEVEL)
+    logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)
     kwargs["logger"] = logger
     return evaluate_model(*args,**kwargs)
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
+ ## create logger
 
-logger = generate_logger_MPI(LOGFILE,LOGLEVEL)    
+logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)    
 logger.info(f"node with rank {rank} started")   
 
 if rank == 0:
@@ -86,8 +87,6 @@ if rank == 0:
 
         
 
-    ## create logger
-    logger = generate_logger_MPI(LOGFILE,LOGLEVEL)                                
 
     ## MPI execute
     results = []

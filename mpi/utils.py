@@ -1,5 +1,4 @@
 import logging
-from mpi4py import MPI 
 import json
 import datetime
 import numpy as np
@@ -10,7 +9,7 @@ from aggregating.utils import flatten_X, generate_train_set
 from stochastic_models import MaxCallStochasticModel
 
 ### general MPI helpers
-def generate_logger_MPI(logfile, level):
+def generate_logger_MPI(logfile, level,rank):
     """
     generate logger for MPI 
 
@@ -18,13 +17,14 @@ def generate_logger_MPI(logfile, level):
     :type logfile: str
     :param level: logging level (info,debug,..)
     :type level: logging.level
+    :param rank: the rank of the process for which to create a logger
     :return: logger
     :rtype: logging.logger
     """
     logging.basicConfig(filename=logfile, level=level,
     format='%(asctime)s.%(msecs)03d %(levelname)s %(name)s - %(funcName)s : %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',)
-    logger = logging.getLogger("rank%i" % MPI.COMM_WORLD.Get_rank())
+    logger = logging.getLogger("rank%i" % rank )
     return logger
 
 def write_results(basename,results,Config):

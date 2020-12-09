@@ -41,7 +41,7 @@ LOGLEVEL = logging.INFO
 def dummy(input,i):
     global counter 
     counter +=1
-    logger = generate_logger_MPI(LOGFILE,LOGLEVEL)                                
+    logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)                                
     logger.info(f"input={input},i= {i}, rank={MPI.COMM_WORLD.Get_rank()}")
     logger.info(f"counter value = {counter}")
     return [counter]*2
@@ -50,7 +50,7 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
 
-logger = generate_logger_MPI(LOGFILE,LOGLEVEL)    
+logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)    
 logger.info(f"node with rank {rank} started")                          
 
 hyperparams = [{'M':1},{'M':3},{'M':5},{'M':7},{'M':9},{'M':11},{'M':13}]

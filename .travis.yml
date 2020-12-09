@@ -6,7 +6,6 @@ cache: pip
 
 install:
   - pip install -r requirements/requirements.txt
-  - pip install -r requirements/mpi_requirements.txt
 
 
 script:
