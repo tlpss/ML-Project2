@@ -31,8 +31,8 @@ class Config:
     """
     container class for config params
     """
-    N_train  = 5000
-    N_test = 50000
+    N_train  = 500
+    N_test = 5000
     d = 1
     T = 2
     Delta= [1/12,11/12]
@@ -72,9 +72,10 @@ def train_and_evaluate_wrapper(model, train_indices,alpha,m,i):
 ## init
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
+size = comm.Get_size()
 
 logger = generate_logger_MPI(LOGFILE,LOGLEVEL)    
-logger.info(f"node with rank {rank} started")  
+logger.info(f"node with rank {rank}/{size} started")  
 
 ## let the main task create the train & testsets
 if rank == 0:
@@ -85,12 +86,28 @@ if rank == 0:
 
 ## broadcast the required data to all nodes
 # broadcast the numpy arrays separately for efficiency gains
-comm.Bcast(DataContainer.X_train, root = 0)
-comm.Bcast(DataContainer.y_train, root = 0)
+# make broadcasts non blocking since the worker nodes are spawned at different times
+# https://github.com/mpi4py/mpi4py/blob/70333ef76db05f643347b9880a05967891fb1eed/src/mpi4py/MPI/Comm.pyx#L750 
+# this feature is not documented in the documentation, but the source code clearly indicates it is present
+xtrain_req = comm.Ibcast(DataContainer.X_train, root = 0)
+ytrain_req = comm.Ibcast(DataContainer.y_train, root = 0)
+
+xtest_list_req = []
 for i in range(len(DataContainer.X_test_list)):
-    comm.Bcast(DataContainer.X_test_list[i],root = 0)
+    req = comm.Ibcast(DataContainer.X_test_list[i],root = 0)
+    xtest_list_req.append(req)
+
+if rank > 0:
+    # want the broadcast to be blocking since we need the data before continuing
+    logger.debug(f"waiting for broadcasts")
+    xtrain_req.Wait()
+    ytrain_req.Wait()
+    for req in xtest_list_req:
+        req.Wait()
+
+
 logger.debug(f"X_test_list= {DataContainer.X_test_list}")
- 
+logger.info(f"broadcasting done for this node")
 
 if rank == 0:
     """
@@ -149,6 +166,7 @@ if rank == 0:
 
     ## compute the normalized error for all hyperparam runs & all trials
     V_0  = generate_V_0(100000,Config.Delta,Config.d)
+    logger.info(f"V_0 = {V_0}")
     normalized_error_results = []
     for result in predictions:
         errors  = []

@@ -26,7 +26,7 @@ from stochastic_models import MaxCallStochasticModel
 
 
 
-LOGFILE = "logs/bagging.log"
+LOGFILE = "logs/naive_bagging.log"
 LOGLEVEL = logging.INFO
 WRITEBACK = True
  
