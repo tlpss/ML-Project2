@@ -7,5 +7,5 @@
 #SBATCH --time 01:30:00 
 echo STARTING AT `date`
 export MV2_ENABLE_AFFINITY=0 # disable affinity to make each task use seperate cpus
-srun python -m mpi4py.futures /scratch/lips/ML-Project2/mpi/mpi_bagging.py
+srun python -m mpi4py.futures /scratch/lips/ML-Project2/mpi/mpi_bagging_naive.py
 echo FINISHED at `date`

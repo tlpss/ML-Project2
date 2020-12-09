@@ -1,22 +1,3 @@
-
-from mpi4py.futures import MPIPoolExecutor
-from mpi4py import MPI
-import logging 
-
-# add modules to path
-import os 
-import sys         
-module_path = os.path.join(os.path.dirname(__file__), '..')
-sys.path.append(module_path)
-
-from aggregating.gridsearch import evaluate_model
-from mpi.utils import generate_logger_MPI
-
-
-counter = 0 
-LOGFILE = "logs/dummy.log"
-LOGLEVEL = logging.INFO
-
 '''
 dummpy MPI file to showcase how to run an MPIPool, keeping gridsearches in mind
 a
@@ -37,6 +18,25 @@ if not (eg MSMPI)
 
 for each of the N processes
 ''' 
+
+from mpi4py.futures import MPIPoolExecutor
+from mpi4py import MPI
+import logging 
+
+# add modules to path
+import os 
+import sys         
+module_path = os.path.join(os.path.dirname(__file__), '..')
+sys.path.append(module_path)
+
+from aggregating.gridsearch import evaluate_model
+from mpi.utils import generate_logger_MPI
+
+
+counter = 0 
+LOGFILE = "logs/dummy.log"
+LOGLEVEL = logging.INFO
+
 
 def dummy(input,i):
     global counter 
