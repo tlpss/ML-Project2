@@ -31,17 +31,18 @@ class Config:
     """
     container class for config params
     """
-    N_train  = 100
-    N_test = 5000
-    d = 2
+    N_train  = 20000
+    N_test = 50000
+    d = 6
     T = 2
     Delta= [1/12,11/12]
-    trials = 5
+    trials = 4
 
     #Hyperparam Grid
 
-    M_grid = [2]
-    alpha_grid = [0.3]
+    M_grid = [1,4,7,10,13,16,19]
+    alpha_grid = [0.4]
+
 
 class DataContainer:
     """

@@ -3,6 +3,7 @@ import json
 import datetime
 import numpy as np
 
+from sklearn.base import BaseEstimator
 from sklearn.gaussian_process import GaussianProcessRegressor
 
 from aggregating.utils import flatten_X, generate_train_set
@@ -93,7 +94,7 @@ def train_and_evaluate(model, X_train, y_train, X_test_list):
     ## evaluate 
     result_list = []
     for x_test in X_test_list:
-        mu, sigma = model.predict(x_test,return_std=True)
+        mu, sigma = memory_efficient_predict(model,x_test,max_size=20000)
         result_list.append((mu,sigma))
     return result_list
 
@@ -132,3 +133,21 @@ def trials_soft_prediction(predictors_results,trials):
         prediction = soft_prediction(predictions)
         prediction_list.append(prediction)
     return prediction_list
+
+
+def memory_efficient_predict(model, X, max_size = 20000):
+    assert isinstance(model, GaussianProcessRegressor)
+    if X.shape[0] > max_size:
+        n = int(X.shape[0]/max_size)
+        datasets = np.array_split(X,n)
+        mu_list = []
+        sigma_list = []
+        for dataset in datasets:
+            mu,sigma = model.predict(dataset, return_std = True)
+            mu_list.append(mu)
+            sigma_list.append(sigma)
+        mu = np.concatenate(mu_list)
+        sigma = np.concatenate(sigma_list)
+        return mu, sigma
+    else: 
+        return model.predict(X, return_std = True)

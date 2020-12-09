@@ -5,7 +5,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 import unittest
 
-from mpi.utils import generate_bagging_train_indices, train_and_evaluate
+from mpi.utils import generate_bagging_train_indices, memory_efficient_predict, train_and_evaluate
 from stochastic_models import *
 from aggregating.utils import flatten_X
 
@@ -52,5 +52,38 @@ class TestMPIUtils(unittest.TestCase):
         self.assertEqual(sigma_list[0].shape,(X_test[0].shape[0],))
         self.assertTrue((mu_list[0]-mu_list[1]).all())
 
+
+    def test_mem_efficient_evaluation(self):
+        lambda_range = (self.N_train*1e-9 , self.N_train*1e-3)
+        alpha_range = (8.3*1e-5, 0.83)
+        length_scale = np.sort(1/np.sqrt((2*alpha_range[0], 2*alpha_range[1])))
+
+        #kernel
+        kernel = RBF(length_scale= (length_scale[0] + length_scale[1])/2, length_scale_bounds=length_scale) \
+            + WhiteKernel(noise_level= (lambda_range[0] + lambda_range[1])/2 , noise_level_bounds=lambda_range)
+
+        gpr = GaussianProcessRegressor(kernel,copy_X_train=False)
+
+        s_test = MaxCallStochasticModel(2005,self.d,[1/12,11/12])
+        s_test.generate_samples()
+
+        mu1, sigma1 = gpr.predict(flatten_X(s_test.X),return_std=True)
+
+        mu2,sigma2 = memory_efficient_predict(gpr,flatten_X(s_test.X),max_size= 20000)
+
+        mu3,sigma3 = memory_efficient_predict(gpr,flatten_X(s_test.X),max_size= 500)
+
+        self.assertFalse((mu1-mu2).any())
+        self.assertFalse((mu1-mu3).any())
+        self.assertFalse((sigma1-sigma2).any())
+        self.assertFalse((sigma2-sigma3).any())
+        self.assertTrue((mu3-sigma3).any())
+        self.assertTrue(mu1.shape == s_test.y.shape)
+
+
+
+
+
+        
 
 

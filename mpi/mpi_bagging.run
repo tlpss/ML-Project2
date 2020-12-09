@@ -1,10 +1,11 @@
 #!/bin/bash
 #SBATCH --chdir /scratch/lips/ML-Project2/
-#SBATCH --nodes 1
-#SBATCH --ntasks 28
+#SBATCH --nodes 7
+#SBATCH --ntasks 72
+#SBATCH --ntasks-per-node 11 # allocate 15GB/task
 #SBATCH --cpus-per-task 1
-#SBATCH --mem 128G
-#SBATCH --time 01:30:00 
+#SBATCH --mem 165G
+#SBATCH --time 2:00:00 
 echo STARTING AT `date`
 export MV2_ENABLE_AFFINITY=0 # disable affinity to make each task use seperate cpus
 srun python -m mpi4py.futures /scratch/lips/ML-Project2/mpi/mpi_bagging.py
