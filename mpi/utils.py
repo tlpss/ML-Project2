@@ -118,6 +118,25 @@ def soft_prediction(predictor_lists,epsilon = 1e-10):
     predictions = predictions / sigmas
     return predictions
     
+
+def hard_prediction(predictor_lists):
+    """
+    creates the hard prediction of the bagging ensemble using the individual predictions
+
+    :param predictor_lists: the individual predictions & sigmas
+    :type predictor_lists: [[mu_i, sigma_i]]
+    :return: single list with predictions
+    :rtype: List of np.ndarray for each of the predicted sets
+    """
+    predictions = np.zeros(predictor_lists[0][0].shape[0])
+    npredictors = len(predictor_lists)
+    for predictor_list in predictor_lists:
+        mu,sigma = predictor_list
+        mu = mu.flatten()
+        predictions = predictions +  mu 
+
+    predictions = predictions / npredictors
+    return predictions
 def trials_soft_prediction(predictors_results,trials):
     """
     gets the predictions for a list of the evaluations for each predictor in an ensemble, for a number of trials
@@ -131,6 +150,22 @@ def trials_soft_prediction(predictors_results,trials):
     for trial in range(trials):
         predictions = [predictor[trial] for predictor in predictors_results]
         prediction = soft_prediction(predictions)
+        prediction_list.append(prediction)
+    return prediction_list
+
+def trials_hard_prediction(predictors_results,trials):
+    """
+    gets the HARD predictions for a list of the evaluations for each predictor in an ensemble, for a number of trials
+
+    :param predictors_results:  [[(mu_predictor_i,trial_j;sigma_predictor_i,trial_j) for j in range(trials)] for i in range(M)]
+    :type predictors_results: [type]
+    :param trials: # trials
+    :type trials: [type]
+    """
+    prediction_list = []
+    for trial in range(trials):
+        predictions = [predictor[trial] for predictor in predictors_results]
+        prediction = hard_prediction(predictions)
         prediction_list.append(prediction)
     return prediction_list
 

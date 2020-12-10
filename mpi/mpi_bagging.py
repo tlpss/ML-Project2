@@ -18,7 +18,7 @@ from mpi4py import MPI
 from aggregating.gridsearch import evaluate_model
 from aggregating.models import SimpleBagger
 from aggregating.utils import normalized_error_VT, flatten_X, generate_V_0, generate_train_set, create_GPR
-from mpi.utils import generate_logger_MPI, write_results, generate_bagging_train_indices,train_and_evaluate, generate_test_sets, trials_soft_prediction
+from mpi.utils import generate_logger_MPI, trials_hard_prediction, write_results, generate_bagging_train_indices,train_and_evaluate, generate_test_sets, trials_soft_prediction
 from stochastic_models import MaxCallStochasticModel
 
 np.random.seed(2020)
@@ -26,6 +26,7 @@ np.random.seed(2020)
 LOGFILE = "logs/bagging.log"
 LOGLEVEL = logging.DEBUG
 WRITEBACK = True
+SOFTVOTING = False
  
 class Config:
     """
@@ -41,7 +42,7 @@ class Config:
     #Hyperparam Grid
 
     M_grid = [1,4,7,10,13,16,19]
-    alpha_grid = [0.5]
+    alpha_grid = [0.6]
 
 
 class DataContainer:
@@ -151,11 +152,15 @@ if rank == 0:
     results.sort(key = lambda x: (x[0],x[1]))
 
     # combine the ensemble predictions into a single prediction for each trial of each hyperparam setting
-    # SOFT BAGGING
+    #  
     predictions = []
     for result in results:
         predictor_results = result[2] #M* [(m_ij,s_ij)] each of len trials
-        bagging_predictions = trials_soft_prediction(predictor_results, Config.trials)
+        if SOFTVOTING:
+            bagging_predictions = trials_soft_prediction(predictor_results, Config.trials)
+        else: 
+            bagging_predictions = trials_hard_prediction(predictor_results,Config.trials)
+    
         predictions.append([result[0],result[1],bagging_predictions])
 
     ## compute the normalized error for all hyperparam runs & all trials
