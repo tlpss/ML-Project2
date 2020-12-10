@@ -1,11 +1,11 @@
-    """
-    MPI gridsearch for soft bagging. 
-    Naive implementation that does not parallellize the ensemble itself, only the different hyperparam evaluations
+"""
+MPI gridsearch for soft bagging. 
+Naive implementation that does not parallellize the ensemble itself, only the different hyperparam evaluations
 
-    run using the .run file on SCITAS or locally using 
-    $ mpiexec -n 5 python -m mpi4py.futures mpi/mpi_bagging_naive.py
+run using the .run file on SCITAS or locally using 
+$ mpiexec -n 5 python -m mpi4py.futures mpi/mpi_bagging_naive.py
 
-    """
+"""
 # add modules to path
 import os 
 import sys         
@@ -34,8 +34,8 @@ class Config:
     """
     container class for config params
     """
-    N_train  = 5000
-    N_test = 100000
+    N_train  = 50
+    N_test = 100
     d = 1
     T = 2
     Delta= [1/12,11/12]
@@ -107,6 +107,6 @@ if rank == 0:
     results.sort(key = lambda x: (x[0],x[1]))
     
     if WRITEBACK:
-        write_results("mpi_bagging",results,Config,Config.M_grid,Config.alpha_grid)
+        write_results("mpi_bagging",results,Config)
     print(results)
 
