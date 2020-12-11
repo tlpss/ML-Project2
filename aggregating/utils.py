@@ -75,8 +75,27 @@ def generate_train_set(N,Delta,d):
     X_train = flatten_X(s_train.X)
     V_0 = s_train.generate_true_V(0)
     V_0 = V_0.mean()
-    print(f"V_0 of the set = {V_0}")
+    print(f"V_0_train of the set = {V_0}")
     return X_train, y_train
+
+def generate_test_set(N,Delta,d):
+    """
+    generate trainset with specified shape
+
+    :param N: [description]
+    :param Delta: [description]
+    :param d: [description]
+    :return: X_train, y_train
+    :rtype: np.ndarray, np.ndarray
+    """
+    s_test = MaxCallStochasticModel(N,d,Delta)
+    s_test.generate_samples()
+    y_test = s_test.y
+    X_test = flatten_X(s_test.X)
+    V_0 = s_test.generate_true_V(0)
+    V_0 = V_0.mean()
+    print(f"V_0_test of the set = {V_0}")
+    return X_test, y_test
 
 def create_GPR(N_train):
     """

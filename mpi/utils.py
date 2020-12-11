@@ -32,7 +32,12 @@ def write_results(basename,results,Config):
     res_dict = {'N_train': Config.N_train, 'N_test': Config.N_test,'mgrid': Config.M_grid, 'alpha_grid': Config.alpha_grid, 'errors': results}
     with open("logs/" + basename + f'{str(datetime.datetime.now().strftime("%Y-%m-%d.%H-%M-%S"))}.json', 'w') as fp:
         json.dump(res_dict, fp)
-
+        
+def write_boosting_results(basename, results, Config):
+    res_dict = {'N_train': Config.N_train, 'N_test': Config.N_test,'Ratios': Config.Ratios, 'test_errors': results}
+    with open("logs/" + basename + f'{str(datetime.datetime.now().strftime("%Y-%m-%d.%H-%M-%S"))}.json', 'w') as fp:
+        json.dump(res_dict, fp)
+        
 #### Bagging MPI helpers
 def generate_bagging_train_indices(N_train,alpha,M):
     """
