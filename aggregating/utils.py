@@ -117,6 +117,15 @@ def create_GPR(N_train):
     gpr = GaussianProcessRegressor(kernel, copy_X_train=False)      
     return gpr
 
+def create_reg_kernel(lambda_):
+    alpha_range = (8.3*1e-5, 0.83)
+    length_scale = np.sort(1/np.sqrt((2*alpha_range[0], 2*alpha_range[1])))
+
+    #kernel
+    kernel = RBF(length_scale= (length_scale[0] + length_scale[1])/2, length_scale_bounds=length_scale) \
+            + WhiteKernel(noise_level= lambda_ , noise_level_bounds="fixed") # fix lambda 
+
+    return kernel
 def memory_efficient_predict(model, X, max_size = 20000):
     assert isinstance(model, GaussianProcessRegressor)
     if X.shape[0] > max_size:
