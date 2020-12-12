@@ -96,7 +96,15 @@ class SimplePaster(AggregatingBaseClass):
         super(SimplePaster,self).__init__(M,predictor)
         self.train_size_alpha = train_size_alpha
         
-
+    def _split_train_set(self,X,y):
+        n = round(X.shape[0]*self.train_size_alpha)
+        X_list = []
+        y_list = []
+        for i in range(self.M):
+            indices = np.random.choice(X.shape[0],size=n,replace=False)
+            X_list.append(X[indices])
+            y_list.append(y[indices])
+        return X_list, y_list
 
 class SimpleBagger(AggregatingBaseClass):
     """
