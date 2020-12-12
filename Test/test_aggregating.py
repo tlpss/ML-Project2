@@ -105,7 +105,7 @@ class TestGridSearch(unittest.TestCase):
         V_0= V_0.mean()
         model = SimplePaster(0,0,GaussianProcessRegressor(kernel,copy_X_train=False))
         errors = evaluate_model(model,{'M':1, 'train_size_alpha':1.0},flatten_X(X_train),y_train,d, [1/12,11/12],trials,N_test,MaxCallStochasticModel,V_0=V_0,random_seeds=[2020,2021])
-        errors2 = evaluate_model(model,{'M':1, 'train_size_alpha':1.0},flatten_X(X_train),y_train,d, [1/12,11/12],trials,N_test,MaxCallStochasticModel,V_0=V_0,random_seeds=[2020,2021])
+        errors2 = evaluate_model(model,{'M':1, 'train_size_alpha':1.0},flatten_X(X_train),y_train,d, [1/12,11/12],trials,N_test,MaxCallStochasticModel,V_0,None,[2020,2021])
         print(errors)
         print(errors2)
         self.assertTrue(len(errors) ==2)

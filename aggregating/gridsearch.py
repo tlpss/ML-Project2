@@ -49,6 +49,8 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
     :param V_0: V_0 value, could be obtained using larger set to improve accuracy of the results 
     :type V_0: optional float
     :param logger: Optional, logger for debug information 
+    :param seeds: Optional, list of seeds (in size of trials),
+                so that the same seed is used to generate the testset over multiple instances of the gridsearch
     :return: list containing the normalized errrors
     :rtype: list of size trials
     """
@@ -69,14 +71,12 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
         # evaluate the model 
         for trial in range(trials):
             if random_seeds:
-                print(random_seeds[trial])
                 np.random.seed(random_seeds[trial])
             s_test = samples_generator(N_test, d, DeltaT)
             s_test.generate_samples()
             y_test = s_test.y
             X_test = s_test.X
             S_test = s_test.S
-            print(y_test)
 
             Flattened_X_test = flatten_X(X_test)
 
