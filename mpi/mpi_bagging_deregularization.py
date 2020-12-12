@@ -1,5 +1,7 @@
 """
 Parallelized MPI gridsearch for SOFT BAGGING
+Here we perform a gridsearch over different lambda ranges in order to see if the ensemble can leverage its reduced variance to allow a higher variance
+of a single estimator (which implies lower bias)
 """
 
 # add modules to path
@@ -10,29 +12,29 @@ sys.path.append(module_path)
 
 import logging 
 import numpy as np 
-from sklearn.base import clone
+from sklearn.gaussian_process import GaussianProcessRegressor
 
 from mpi4py.futures import MPIPoolExecutor
 from mpi4py import MPI
 
 from aggregating.gridsearch import evaluate_model
 from aggregating.models import SimpleBagger
-from aggregating.utils import normalized_error_VT, flatten_X, generate_V_0, generate_train_set, create_GPR
+from aggregating.utils import create_reg_kernel, normalized_error_VT, flatten_X, generate_V_0, generate_train_set, create_GPR
 from mpi.utils import generate_logger_MPI, trials_hard_prediction, write_results, generate_bagging_train_indices,train_and_evaluate, generate_test_sets, trials_soft_prediction
 from stochastic_models import MaxCallStochasticModel
 
 np.random.seed(2020)
 
-LOGFILE = "logs/bagging.log"
-LOGLEVEL = logging.DEBUG
+LOGFILE = "logs/degeg_bagging.log"
+LOGLEVEL = logging.INFO
 WRITEBACK = True
-SOFTVOTING = False
+SOFTVOTING = True
  
 class Config:
     """
     container class for config params
     """
-    N_train  = 20000
+    N_train = 20000
     N_test = 100000
     d = 6
     T = 2
@@ -42,7 +44,9 @@ class Config:
     #Hyperparam Grid
 
     M_grid = [1,4,7,10,13,16,19]
-    alpha_grid = [0.6]
+    alpha_grid = [0.5] # legacy for the results writer
+    alpha = 0.5
+    lambda_grid = [1e-12,1e-10, 1e-8, 1e-6,1e-4]
 
 
 class DataContainer:
@@ -114,9 +118,6 @@ if rank == 0:
 
     """
 
-    ## generate model
-    base_gpr = create_GPR(Config.N_train)
-
     ## create logger
     logger = generate_logger_MPI(LOGFILE,LOGLEVEL,rank)                                
 
@@ -126,22 +127,23 @@ if rank == 0:
         futures =  []
         # evaluate model for all points in grid by creating new mpi node
         for m in Config.M_grid:
-            for alpha in Config.alpha_grid:
-                hyperparams= {'M':m, 'train_size_alpha':alpha}
+            for lambda_ in Config.lambda_grid:
+                hyperparams= {'M':m, 'train_size_alpha':Config.alpha, "lambda": lambda_}
                 logger.info(f"starting evaluations for {hyperparams}")
                 # generate index sets for the ensemble
-                indices_list  = generate_bagging_train_indices(Config.N_train,alpha,m)
+                indices_list  = generate_bagging_train_indices(Config.N_train,Config.alpha,m)
                 predictor_futures = []
 
                 for i in range(m):
                     # clone base model for each member of the ensemble
-                    gpr = clone(base_gpr)
+                    reg_kernel = create_reg_kernel(lambda_)
+                    gpr = GaussianProcessRegressor(reg_kernel,  copy_X_train=False)
                     # submit job 
                     logger.debug(f"starting {i}-th model of the ensemble")
-                    future = executor.submit(train_and_evaluate_wrapper, gpr,indices_list[i],alpha, m, i) #[mu_list,sigma_list] each of len trials
+                    future = executor.submit(train_and_evaluate_wrapper, gpr,indices_list[i],Config.alpha, m, i) #[mu_list,sigma_list] each of len trials
                     predictor_futures.append(future) 
 
-                futures.append([m,alpha,predictor_futures]) # M* [mu_list,sigma_list] each of len trials
+                futures.append([m,lambda_,predictor_futures]) # M* [mu_list,sigma_list] each of len trials
         # get results
         for future in futures:
             predictor_results = []
@@ -176,5 +178,5 @@ if rank == 0:
 
     print(normalized_error_results)
     if WRITEBACK:
-        write_results("mpi_bagging",normalized_error_results,Config)
+        write_results("mpi_regularized_bagging",normalized_error_results,Config)
 

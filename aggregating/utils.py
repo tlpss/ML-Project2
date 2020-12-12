@@ -75,8 +75,27 @@ def generate_train_set(N,Delta,d):
     X_train = flatten_X(s_train.X)
     V_0 = s_train.generate_true_V(0)
     V_0 = V_0.mean()
-    print(f"V_0 of the set = {V_0}")
+    print(f"V_0_train of the set = {V_0}")
     return X_train, y_train
+
+def generate_test_set(N,Delta,d):
+    """
+    generate trainset with specified shape
+
+    :param N: [description]
+    :param Delta: [description]
+    :param d: [description]
+    :return: X_train, y_train
+    :rtype: np.ndarray, np.ndarray
+    """
+    s_test = MaxCallStochasticModel(N,d,Delta)
+    s_test.generate_samples()
+    y_test = s_test.y
+    X_test = flatten_X(s_test.X)
+    V_0 = s_test.generate_true_V(0)
+    V_0 = V_0.mean()
+    print(f"V_0_test of the set = {V_0}")
+    return X_test, y_test
 
 def create_GPR(N_train):
     """
@@ -98,6 +117,15 @@ def create_GPR(N_train):
     gpr = GaussianProcessRegressor(kernel, copy_X_train=False)      
     return gpr
 
+def create_reg_kernel(lambda_):
+    alpha_range = (8.3*1e-5, 0.83)
+    length_scale = np.sort(1/np.sqrt((2*alpha_range[0], 2*alpha_range[1])))
+
+    #kernel
+    kernel = RBF(length_scale= (length_scale[0] + length_scale[1])/2, length_scale_bounds=length_scale) \
+            + WhiteKernel(noise_level= lambda_ , noise_level_bounds="fixed") # fix lambda 
+
+    return kernel
 def memory_efficient_predict(model, X, max_size = 20000):
     assert isinstance(model, GaussianProcessRegressor)
     if X.shape[0] > max_size:
