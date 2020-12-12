@@ -6,7 +6,7 @@ from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 import unittest
 
 from aggregating.gridsearch import evaluate_model, create_logger
-from aggregating.models import SimpleBagger
+from aggregating.models import SimpleBagger, SimplePaster
 from aggregating.utils import *
 from stochastic_models import *
 
@@ -82,4 +82,34 @@ class TestGridSearch(unittest.TestCase):
         self.assertTrue(len(errors) ==2)
         self.assertTrue(errors[0]>0)
         self.assertTrue(errors[0] < 0.8)
+
+    def test_gridsearch_seeds(self):
+        N_train = 100
+        N_test = 20
+        d = 2
+        T = 2 
+        trials = 2
+        lambda_range = (N_train*1e-9 , N_train*1e-3)
+        alpha_range = (8.3*1e-5, 0.83)
+        length_scale = np.sort(1/np.sqrt((2*alpha_range[0], 2*alpha_range[1])))
+
+        #kernel
+        kernel = RBF(length_scale= (length_scale[0] + length_scale[1])/2, length_scale_bounds=length_scale) \
+            + WhiteKernel(noise_level= (lambda_range[0] + lambda_range[1])/2 , noise_level_bounds=lambda_range)
+
+        s_train = MaxCallStochasticModel(N_train,d,[1/12,11/12])
+        s_train.generate_samples()
+        y_train = s_train.y
+        X_train = s_train.X
+        V_0 = s_train.generate_true_V(0)
+        V_0= V_0.mean()
+        model = SimplePaster(0,0,GaussianProcessRegressor(kernel,copy_X_train=False))
+        errors = evaluate_model(model,{'M':1, 'train_size_alpha':1.0},flatten_X(X_train),y_train,d, [1/12,11/12],trials,N_test,MaxCallStochasticModel,V_0=V_0,random_seeds=[2020,2021])
+        errors2 = evaluate_model(model,{'M':1, 'train_size_alpha':1.0},flatten_X(X_train),y_train,d, [1/12,11/12],trials,N_test,MaxCallStochasticModel,V_0=V_0,random_seeds=[2020,2021])
+        print(errors)
+        print(errors2)
+        self.assertTrue(len(errors) ==2)
+        self.assertTrue(errors[0]>0)
+        self.assertTrue(errors[0] < 0.8)
+
 

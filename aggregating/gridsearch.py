@@ -23,7 +23,7 @@ def create_logger(hyperparams,log):
 
     return logger
 
-def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_test, samples_generator,V_0 = None, logger = None):
+def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_test, samples_generator,V_0 = None, logger = None,random_seeds = None):
     """
     Sets hyperparameters of the model, trains it first and evaluates it afterwards. 
     Used in GridSearch settings
@@ -68,11 +68,15 @@ def evaluate_model(base_model,hyperparams, X_train, y_train,d, DeltaT,trials,N_t
 
         # evaluate the model 
         for trial in range(trials):
+            if random_seeds:
+                print(random_seeds[trial])
+                np.random.seed(random_seeds[trial])
             s_test = samples_generator(N_test, d, DeltaT)
             s_test.generate_samples()
             y_test = s_test.y
             X_test = s_test.X
             S_test = s_test.S
+            print(y_test)
 
             Flattened_X_test = flatten_X(X_test)
 
