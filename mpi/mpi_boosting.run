@@ -4,8 +4,8 @@
 #SBATCH --ntasks-per-node 7 # allocate 20GB/task
 #SBATCH --cpus-per-task 1
 #SBATCH --mem 165G
-#SBATCH --time 5:00:00 
+#SBATCH --time 35:00:00 
 echo STARTING AT `date`
 export MV2_ENABLE_AFFINITY=0 # disable affinity to make each task use seperate cpus
-srun python -m mpi4py.futures /scratch/cfrancis/ML-Project2/mpi/mpi_boosting_low_dim.py
+srun python -m mpi4py.futures /scratch/cfrancis/ML-Project2/mpi/mpi_boosting.py
 echo FINISHED at `date`
