@@ -25,7 +25,7 @@ from stochastic_models import MaxCallStochasticModel
 
 
 
-LOGFILE = "logs/boosting.log"
+LOGFILE = "logs/boosting_low_dim.log"
 LOGLEVEL = logging.INFO
 WRITEBACK = True
  
@@ -38,9 +38,9 @@ class Config:
     d = 2
     T = 1
     Delta= [1/12,11/12]
-    Max_Iter = 40
+    Max_Iter = 60
     Epsilon = 1e-4
-    Early_Stop = 8
+    Early_Stop = 6
     #Hyperparam 
     Ratios = np.linspace(0.1, 0.4 , num=6).tolist()
     learning_rate = 0.366
