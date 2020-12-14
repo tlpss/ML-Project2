@@ -93,8 +93,8 @@ def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, m
     train_errors = []
     test_errors = []
     
-    current_residual = np.full(len(y_train), 0)
-    y_hat_test = np.full(len(y_test), 0)
+    current_residual = np.full(len(y_train), 0.0)
+    y_hat_test = np.full(len(y_test), 0.0)
 
    
     
