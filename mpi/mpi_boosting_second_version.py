@@ -38,8 +38,8 @@ class Config:
     d = 6
     T = 2
     Delta= [1/12,11/12]
-    Max_Iter = 50
-    Epsilon = 1e-4
+    Max_Iter = 40
+    Epsilon = 1e-8
     Early_Stop = 8
     #Hyperparam 
     Ratios = np.linspace(0.45, 0.9 , num=6).tolist()

@@ -51,16 +51,18 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
             if (( np.abs(min_error[0] - test_errors[-1]) < epsilon)):
                 models = models[:min_error[1]+1]
                 test_errors = test_errors[:min_error[1]+1]
-                print("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore, test error : {}                   ".format(i, min_error[0]))
-                logger.info("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore, test error                 : {}".format(i, min_error[0]))
+                print("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore, test error: {}".format(i, min_error[0]))
+                logger.info("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore, test error: {}".format(i, min_error[0]))
                 return train_errors, test_errors, min_error
             
             min_error = (test_errors[-1], i)
             error_going_up = 0
             print('For iteration number {}, the test error decreased , test error : {} '.format(i, min_error[0]))
+            logger.info("For iteration number {}, the test error decreased , test error : {} ".format(i, min_error[0]))
         else:
             error_going_up += 1
             print('For iteration number {}, the test error increased , test error : {} '.format(i, min_error[0]))
+            logger.info("For iteration number {}, the test error increased , test error : {} ".format(i, min_error[0]))
         
             if  (i==(Max_Iter-1)):
                 logger.info(f"Max_Iter {Max_Iter} reached")

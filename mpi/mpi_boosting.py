@@ -23,7 +23,7 @@ from aggregating.utils import normalized_error_VT, flatten_X, generate_V_0, gene
 from mpi.utils import generate_logger_MPI, write_boosting_results
 from stochastic_models import MaxCallStochasticModel
 
-
+np.random.seed(2020)
 
 LOGFILE = "logs/boosting.log"
 LOGLEVEL = logging.INFO
@@ -38,8 +38,8 @@ class Config:
     d = 6
     T = 2
     Delta= [1/12,11/12]
-    Max_Iter = 40
-    Epsilon = 1e-4
+    Max_Iter = 50
+    Epsilon = 1e-8
     Early_Stop = 8
     #Hyperparam 
     Ratios = np.linspace(0.1, 0.4 , num=6).tolist()
