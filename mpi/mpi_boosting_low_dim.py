@@ -39,11 +39,11 @@ class Config:
     T = 1
     Delta= [1/12,11/12]
     Max_Iter = 60
-    Epsilon = 1e-4
+    Epsilon = 1e-8
     Early_Stop = 6
     #Hyperparam 
     Ratios = np.linspace(0.1, 0.4 , num=6).tolist()
-    learning_rate = 0.366
+    learning_rate = 0.15
     
 def evaluate_model_MPI(*args,**kwargs):
     """
@@ -98,7 +98,7 @@ if rank == 0:
         # evaluate model for all points in grid by creating new mpi node
         for r in Config.Ratios:
             logger.info(f"starting evaluation for ratio {r}")
-            future = executor.submit(evaluate_boosting, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy())
+            future = executor.submit(evaluate_boosting_1, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy())
             logger.info(f"minimum error found for ratio {r} is {future.result()[2][0]} ")
             futures.append([r,future])
         
