@@ -25,7 +25,7 @@ from stochastic_models import MaxCallStochasticModel
 
 
 
-LOGFILE = "logs/boosting_low_dim.log"
+LOGFILE = "logs/boosting_low_dim_2.log"
 LOGLEVEL = logging.INFO
 WRITEBACK = True
  
@@ -98,7 +98,7 @@ if rank == 0:
         # evaluate model for all points in grid by creating new mpi node
         for r in Config.Ratios:
             logger.info(f"starting evaluation for ratio {r}")
-            future = executor.submit(evaluate_boosting_1, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy())
+            future = executor.submit(evaluate_boosting_2, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy())
             logger.info(f"minimum error found for ratio {r} is {future.result()[2][0]} ")
             futures.append([r,future])
         
