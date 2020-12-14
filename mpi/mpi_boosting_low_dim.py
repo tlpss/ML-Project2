@@ -35,15 +35,15 @@ class Config:
     """
     N_train  = 5000
     N_test = 50000
-    d = 2
-    T = 1
+    d = 6
+    T = 2
     Delta= [1/12,11/12]
-    Max_Iter = 50
-    Epsilon = 1e-6
+    Max_Iter = 45
+    Epsilon = 1e-7
     Early_Stop = 6
     #Hyperparam 
     Ratios = np.linspace(0.1, 0.4 , num=6).tolist()
-    learning_rate = 0.33
+    learning_rate = 0.336
     
 def evaluate_model_MPI(*args,**kwargs):
     """
@@ -98,7 +98,7 @@ if rank == 0:
         # evaluate model for all points in grid by creating new mpi node
         for r in Config.Ratios:
             logger.info(f"starting evaluation for ratio {r}")
-            future = executor.submit(evaluate_boosting_1, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy(), logger=logger)
+            future = executor.submit(evaluate_boosting, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy(), logger=logger)
             logger.info(f"minimum error found for ratio {r} is {future.result()[2][0]} ")
             futures.append([r,future])
         
@@ -109,7 +109,7 @@ if rank == 0:
     results.sort(key = lambda x: x[0])
     
     if WRITEBACK:
-        write_boosting_results("mpi_boosting",results,Config)
+        write_boosting_results("mpi_boosting_low_dim",results,Config)
     print(results)
 
         
