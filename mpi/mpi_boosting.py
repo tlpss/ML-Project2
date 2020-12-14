@@ -18,7 +18,7 @@ import numpy as np
 from mpi4py.futures import MPIPoolExecutor
 from mpi4py import MPI
 
-from aggregating.boosting_model_evaluation import *
+from boosting.boosting_model_evaluation import *
 from aggregating.utils import normalized_error_VT, flatten_X, generate_V_0, generate_train_set, create_GPR
 from mpi.utils import generate_logger_MPI, write_boosting_results
 from stochastic_models import MaxCallStochasticModel
