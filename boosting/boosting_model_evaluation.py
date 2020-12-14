@@ -6,6 +6,7 @@ from aggregating.utils import *
 import traceback
 
 def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min_error, early_stop, learning_rate, epsilon, sample_size, V_0_test= None, logger = None):
+    np.random.seed(2020)
     error_going_up = 0
     N_train = len(y_train)
     N_test = len(y_test)
@@ -51,9 +52,10 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
             if (( np.abs(min_error[0] - test_errors[-1]) < epsilon)):
                 models = models[:min_error[1]+1]
                 test_errors = test_errors[:min_error[1]+1]
-                print("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore, test error: {}".format(i, min_error[0]))
-                logger.info("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore, test error: {}".format(i, min_error[0]))
-                return train_errors, test_errors, min_error
+                best_predictor = y_hat_test
+                print("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore with epsilon: {}, test error: {}".format(i, epsilon, min_error[0]))
+                logger.info("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore with epsilon: {}, test error: {}".format(i, epsilon, min_error[0]))
+                return train_errors, test_errors, min_error, best_predictor
             
             min_error = (test_errors[-1], i)
             error_going_up = 0
@@ -68,18 +70,18 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
                 logger.info(f"Max_Iter {Max_Iter} reached")
                 models = models[:min_error[1]+1]
                 test_errors = test_errors[:min_error[1]+1]
-                return train_errors, test_errors, min_error
+                return train_errors, test_errors, min_error, best_predictor
         
             elif (error_going_up == early_stop ):
                 logger.info(f"Early_Stop {early_stop} reached")
                 models = models[: -(early_stop)]
                 test_errors = test_errors[:-(early_stop)]
-                return train_errors, test_errors, min_error
+                return train_errors, test_errors, min_error, best_predictor
                 break #early stopping
                 
          
         
-    return train_errors, test_errors, min_error
+    return train_errors, test_errors, min_error, best_predictor
 
 def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min_error, early_stop, learning_rate, epsilon, sample_size, V_0_test= None, logger = None):
     error_going_up = 0

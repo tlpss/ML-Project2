@@ -3,7 +3,7 @@ MPI gridsearch for soft bagging.
 Naive implementation that does not parallellize the ensemble itself, only the different hyperparam evaluations
 
 run using the .run file on SCITAS or locally using 
-$ mpiexec -n 2 python -m mpi4py.futures mpi/mpi_boosting.py
+$ mpiexec -n 2 python -m mpi4py.futures mpi/mpi_boosting_low_dim_new_approach.py
 
 """
 # add modules to path
@@ -33,8 +33,8 @@ class Config:
     """
     container class for config params
     """
-    N_train  = 5000
-    N_test = 50000
+    N_train  = 100
+    N_test = 1000
     d = 2
     T = 1
     Delta= [1/12,11/12]
@@ -76,6 +76,7 @@ if rank == 0:
     """
 
     ## generate Training set, Test set & V_0s
+    N=10
     X_train, y_train = generate_train_set(Config.N_train, Config.Delta,Config.d)
     X_test, y_test = generate_test_set(Config.N_test, Config.Delta,Config.d)
 
@@ -99,24 +100,22 @@ if rank == 0:
         # evaluate model for all points in grid by creating new mpi node
         for r in Config.Ratios:
             min_err = float("inf")
-            for i in range(10):
+            for i in range(N):
                 
                 logger.info(f"starting evaluation for ratio {r}")
                 future = executor.submit(evaluate_boosting, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy(), logger=logger)
                 logger.info(f"minimum error found for ratio {r} is {future.result()[2][0]} ")
-                if (future.result()[2][0] < min_err):
-                    min_err = future.result()[2][0]
-                    best_predictor = future.result()[3]
-                futures.append([r,future])
-        
+                best_predictor += future.result()[3]
+                futures.append([r,future[:3]])
+            futures.append(best_predictor/N)
         # get results
         for future in futures:
-            results.append([future[0],future[1].result()[1],future[1].result()[2], future[1].result()[3]])
+            results.append([future[0],future[1].result()[1],future[1].result()[2], future[2]])
         
     results.sort(key = lambda x: x[0])
     
     if WRITEBACK:
-        write_boosting_results("mpi_boosting",results,Config)
+        write_boosting_results("mpi_boosting_low_dim_new_approach",results,Config)
     print(results)
 
         
