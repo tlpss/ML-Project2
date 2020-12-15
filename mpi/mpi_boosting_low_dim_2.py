@@ -36,14 +36,14 @@ class Config:
     N_train  = 5000
     N_test = 50000
     d = 6
-    T = 1
+    T = 2
     Delta= [1/12,11/12]
     Max_Iter = 50
     Epsilon = 1e-7
-    Early_Stop = 6
+    Early_Stop = 5
     #Hyperparam 
-    Ratios = np.linspace(0.05, 0.3 , num=4).tolist()
-    learning_rate = 0.336
+    Ratios = np.linspace(0.7,1.0 , num=4).tolist()
+    learning_rate = 0.7
     
 def evaluate_model_MPI(*args,**kwargs):
     """
