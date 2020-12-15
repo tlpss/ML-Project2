@@ -2,9 +2,36 @@
 Project 2 of ML course @ EPFL - Ensemble Kernel Methods for Portfolio Valuation
 
 ## Project Description 
-TODO
+This repo contains the code for the second project of the ML Course @ EPFL. We build on a [paper](https://arxiv.org/abs/1906.03726) written by Boudabsa and Filipovic, in which they describe a first ML method for dynamic portfolio valuation. We try to improve on their results using ensemble methods, while making sure that the valuation process can still be evaluated in closed-form.  To this end we implement Ensemble methods using the GPR implementation of Sklearn, and create the required scripts to evaluate them in low dimensions on jupyter notebooks and in higher dimensions on a HPC cluster with sbatch interface. 
+
 ## Project Structure
-TODO
+
+Tree of most important folders & files in the project:
+```
+.
+├── Results
+├── Test                                   unittests for models and helpers
+├── aggregating/              
+│   ├── gridsearch.py                     functions to train and evaluate a model and log the resulting error
+│   ├── models.py                         the different aggregating models that are used
+│   └── utils.py                          utils for creating models, datasets, loggers...
+├── boosting/       
+│   └── boosting_model_evaluation.py      code for evaluating the boosting models 
+├── doc                                   contains the report
+├── logs                                  stub folder to create logs files
+├── mpi/                                  mpi python files and batch scripts for the different models
+│   ├── Test                              tests to see if mpi is configured correctly
+│   ├── *.py                              script that can be executed by mpi nodes to evaluate models
+│   └── *.run                             sbatch run files that specify the required resources and provide the entry point for the related script
+├── notebooks                             notebooks to evaluate the models in lower dimensions
+├── requirements/                         pip requirement files
+│   ├── requirements.txt        
+│   └── mpi-requirements.txt
+├── create_scitas_environment.sh          convenience script that sets up an MPI environment using gcc & mvapich2             
+├── profile_memory_usage.py               script to get the memory used by a GPR
+├── stochastic_models.py                  driver models that generate the datasets
+└── visualisations.py                     functions to generate plots of the results 
+```
 ## Setup
 ### Python 
 - create a virtualenv (python 3.7 is guaranteed to work)
