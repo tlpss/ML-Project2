@@ -1,5 +1,5 @@
 """
-Parallelized MPI gridsearch for SOFT BAGGING
+Parallelized MPI version to evaluate the effect of fixing Lambda
 Here we perform a gridsearch over different lambda ranges in order to see if the ensemble can leverage its reduced variance to allow a higher variance
 of a single estimator (which implies lower bias)
 """

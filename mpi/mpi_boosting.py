@@ -1,6 +1,5 @@
 """
-MPI gridsearch for soft bagging. 
-Naive implementation that does not parallellize the ensemble itself, only the different hyperparam evaluations
+MPI basic boosting
 
 run using the .run file on SCITAS or locally using 
 $ mpiexec -n 2 python -m mpi4py.futures mpi/mpi_boosting.py

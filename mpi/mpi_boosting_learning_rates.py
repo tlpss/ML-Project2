@@ -1,5 +1,5 @@
 """
-MPI gridsearch for soft bagging. 
+MPI boosting 
 Naive implementation that does not parallellize the ensemble itself, only the different hyperparam evaluations
 
 run using the .run file on SCITAS or locally using 
