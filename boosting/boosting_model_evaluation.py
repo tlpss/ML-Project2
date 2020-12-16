@@ -10,10 +10,7 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
     error_going_up = 0
     N_train = len(y_train)
     N_test = len(y_test)
-    train_prediction = np.zeros(N_train)
-    test_prediction = np.zeros(N_test)
-    previous_y_hat = np.zeros(N_train)
-    previous_y_test_hat = np.zeros(N_test)
+    
     models = []
     train_errors = []
     test_errors = []
@@ -52,10 +49,10 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
             if (( np.abs(min_error[0] - test_errors[-1]) < epsilon)):
                 models = models[:min_error[1]+1]
                 test_errors = test_errors[:min_error[1]+1]
-                best_predictor = y_hat_test
+                
                 print("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore with epsilon: {}, test error: {}".format(i, epsilon, min_error[0]))
                 logger.info("For iteration number {}, the boosting stops as the error isn't decraesing enough anymore with epsilon: {}, test error: {}".format(i, epsilon, min_error[0]))
-                return train_errors, test_errors, min_error, best_predictor
+                return train_errors, test_errors, min_error
             
             min_error = (test_errors[-1], i)
             error_going_up = 0
@@ -70,13 +67,13 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
                 logger.info(f"Max_Iter {Max_Iter} reached")
                 models = models[:min_error[1]+1]
                 test_errors = test_errors[:min_error[1]+1]
-                return train_errors, test_errors, min_error, best_predictor
+                return train_errors, test_errors, min_error
         
             elif (error_going_up == early_stop ):
                 logger.info(f"Early_Stop {early_stop} reached")
                 models = models[: -(early_stop)]
                 test_errors = test_errors[:-(early_stop)]
-                return train_errors, test_errors, min_error, best_predictor
+                return train_errors, test_errors, min_error
                 break #early stopping
                 
          
@@ -88,10 +85,7 @@ def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, m
     error_going_up = 0
     N_train = len(y_train)
     N_test = len(y_test)
-    train_prediction = np.zeros(N_train)
-    test_prediction = np.zeros(N_test)
-    previous_y_hat = np.zeros(N_train)
-    previous_y_test_hat = np.zeros(N_test)
+    
     models = []
     train_errors = []
     test_errors = []
