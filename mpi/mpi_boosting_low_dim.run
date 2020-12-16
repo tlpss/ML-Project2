@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --chdir /scratch/cfrancis/ML-Project2/
 #SBATCH --nodes 1
-#SBATCH --ntasks-per-node 7 # allocate 20GB/task
+#SBATCH --ntasks-per-node 9 # allocate 20GB/task
 #SBATCH --cpus-per-task 1
 #SBATCH --mem 165G
-#SBATCH --time 06:00:00 
+#SBATCH --time 03:00:00 
 echo STARTING AT `date`
 export MV2_ENABLE_AFFINITY=0 # disable affinity to make each task use seperate cpus
 srun python -m mpi4py.futures /scratch/cfrancis/ML-Project2/mpi/mpi_boosting_low_dim.py
