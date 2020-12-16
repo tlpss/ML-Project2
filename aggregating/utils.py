@@ -127,6 +127,15 @@ def create_reg_kernel(lambda_):
 
     return kernel
 def memory_efficient_predict(model, X, max_size = 20000):
+    """
+    this functions predicts X using the model but splits of the dataset to reduce the memory requirements for the 
+    kernel evaluation with the matrix of size N_train x N_test
+
+    :param model: GPR
+    :param X: set to evaluate
+    :param max_size: max size to predict at once, defaults to 20000
+    :return: predictions for X
+    """
     assert isinstance(model, GaussianProcessRegressor)
     if X.shape[0] > max_size:
         n = int(X.shape[0]/max_size)
