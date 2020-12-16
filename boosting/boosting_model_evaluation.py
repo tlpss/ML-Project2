@@ -84,6 +84,7 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
     return train_errors, test_errors, min_error, best_predictor
 
 def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min_error, early_stop, learning_rate, epsilon, sample_size, V_0_test= None, logger = None):
+    np.random.seed(2020)
     error_going_up = 0
     N_train = len(y_train)
     N_test = len(y_test)
@@ -95,36 +96,34 @@ def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, m
     train_errors = []
     test_errors = []
     
-    current_residual = np.full(len(y_train), 0.0)
-    y_hat_test = np.full(len(y_test), 0.0)
-
-   
+    y_hat_train = 0.83*fX_2
+    y_hat_test = 0.83*fX_1
     
     for i in range(Max_Iter):
-        model = create_GPR(N_train)
-        
-        indices = np.random.choice(X_train.shape[0],size=sample_size,replace=False)
-       
-        model.fit(X_train[indices], y_train[indices] - current_residual[indices])
-        models.append(model)
-        
-        new_train_predictor = model.predict(X_train)
-        new_test_predictor = model.predict(X_test)
-        
-        current_residual += learning_rate * new_train_predictor
-        
-        y_hat_train = current_residual 
-        
-        y_hat_test += learning_rate * new_test_predictor
-        
         #Evaluating TrainSet error
         
         train_errors.append(normalized_error_VT(y_hat_train,y_train,V_0_train).item())
         
         ##Evaluating TestSet error
         
-        test_errors.append(normalized_error_VT(y_hat_test,y_test,V_0_test).item())
+        test_errors.append(normalized_error_VT(y_hat_test,y_test,V_0).item())
+        
+        model = GaussianProcessRegressor(kernel)
     
+        indices = np.random.choice(X_train.shape[0],size=sample_size,replace=False)
+       
+        model.fit(X_train[indices], y_train[indices] - y_hat_train[indices])
+        models.append(model)
+        
+        new_train_predictor = model.predict(X_train)
+        new_test_predictor = model.predict(X_test)
+        
+        
+        y_hat_train += learning_rate * new_train_predictor
+        
+        y_hat_test += learning_rate * new_test_predictor
+        
+        
         if (test_errors[-1] < min_error[0]):
             if (( np.abs(min_error[0] - test_errors[-1]) < epsilon)):
                 models = models[:min_error[1]+1]
