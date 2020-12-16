@@ -89,7 +89,7 @@ if rank == 0:
     fX_1 = reference.predict(X_test)
     fX_2 = reference.predict(X_train)
 
-    reference_error = normalized_error_VT(f_X, y_test, V_0_test)
+    reference_error = normalized_error_VT(fX_1, y_test, V_0_test)
     logger.info(f"reference error : {reference_error}")
     
     ## MPI execute
