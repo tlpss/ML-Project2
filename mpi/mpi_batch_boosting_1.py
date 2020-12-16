@@ -25,7 +25,7 @@ from stochastic_models import MaxCallStochasticModel
 
 np.random.seed(2020)
 
-LOGFILE = "logs/batch_boosting.log"
+LOGFILE = "logs/batch_boosting_1.log"
 LOGLEVEL = logging.INFO
 WRITEBACK = True
  
