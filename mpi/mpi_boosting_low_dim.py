@@ -23,7 +23,7 @@ from aggregating.utils import normalized_error_VT, flatten_X, generate_V_0, gene
 from mpi.utils import generate_logger_MPI, write_boosting_results
 from stochastic_models import MaxCallStochasticModel
 
-
+np.random.seed(2020)
 
 LOGFILE = "logs/boosting_low_dim.log"
 LOGLEVEL = logging.INFO
