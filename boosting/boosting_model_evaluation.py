@@ -83,7 +83,7 @@ def evaluate_boosting(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min
         
     return train_errors, test_errors, min_error
 
-def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min_error, early_stop, learning_rate, epsilon, sample_size, V_0_test= None, logger = None):
+def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, min_error, early_stop, learning_rate, epsilon, sample_size,  fX_2, fX_1, V_0_test= None, logger = None):
     np.random.seed(2020)
     error_going_up = 0
     N_train = len(y_train)

@@ -86,7 +86,9 @@ if rank == 0:
     
     reference = create_GPR(Config.N_train)
     reference.fit(X_train, y_train)
-    f_X = reference.predict(X_test)
+    fX_1 = reference.predict(X_test)
+    fX_2 = reference.predict(X_train)
+
     reference_error = normalized_error_VT(f_X, y_test, V_0_test)
     logger.info(f"reference error : {reference_error}")
     
@@ -98,7 +100,7 @@ if rank == 0:
         # evaluate model for all points in grid by creating new mpi node
         for r in Config.Ratios:
             logger.info(f"starting evaluation for ratio {r}")
-            future = executor.submit(evaluate_boosting_1, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),V_0_test= V_0_test.copy(), logger = logger)
+            future = executor.submit(evaluate_boosting_1, X_train.copy(), y_train.copy(), X_test.copy(), y_test.copy(),                         V_0_train.copy(), Config.Max_Iter,(float("inf"), float("inf")), Config.Early_Stop, Config.learning_rate,                           Config.Epsilon, round(Config.N_train*r),np.copy(fX_2), np.copy(fX_1), V_0_test= V_0_test.copy(), logger = logger)
             logger.info(f"minimum error found for ratio {r} is {future.result()[2][0]} ")
             futures.append([r,future])
         
@@ -109,7 +111,7 @@ if rank == 0:
     results.sort(key = lambda x: x[0])
     
     if WRITEBACK:
-        write_boosting_results("mpi_batch_boosting_1_5000",results,Config)
+        write_boosting_results("mpi_batch_boosting_1",results,Config)
     print(results)
 
         
