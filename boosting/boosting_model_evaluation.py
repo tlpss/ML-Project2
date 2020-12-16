@@ -102,7 +102,7 @@ def evaluate_boosting_1(X_train, y_train, X_test, y_test, V_0_train, Max_Iter, m
         
         test_errors.append(normalized_error_VT(y_hat_test,y_test,V_0_test).item())
         
-        model = GaussianProcessRegressor(kernel)
+        model = create_GPR(N_train)
     
         indices = np.random.choice(X_train.shape[0],size=sample_size,replace=False)
        
