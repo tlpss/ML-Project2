@@ -206,7 +206,29 @@ def vis_deregularized_soft_bagging_comparison():
     plt.ylabel("normalized error")
     plt.legend()
     plt.show()
+
+def vis_scitas_hard_bagging():
+    M_grid  = [1,4,7,10,13,16,19]
+
+    hard_bagging = [[1, 0.6, [0.1549997293851802, 0.15375185189475996]], [4, 0.6, [0.13012101166021306, 0.1291694128341514]], [7, 0.6, [0.12584157170201724, 0.12516689668218584]], [10, 0.6, [0.1252757922730144, 0.12465275819187449]], [13, 0.6, [0.12377716679882575, 0.12326541250641943]], [16, 0.6, [0.12445440478488304, 0.12364453281812814]], [19, 0.6, [0.12323222749470876, 0.12264874917436597]]]
+
+    hard_bagging = np.array([element[2] for element in hard_bagging])
+
+
+    hard_bagging_mean = np.array(hard_bagging).mean(axis=1)
+    hard_bagging_sigmas = np.array(hard_bagging).std(axis=1)
+    print(hard_bagging_mean)
+    plt.hlines(0.124,xmin=M_grid[0],xmax=M_grid[-1],linestyles='dashed',label="reference error",color="black")
+    plt.errorbar(np.array(M_grid),hard_bagging_mean[:],hard_bagging_sigmas[:],marker ='s',linestyle="-",label = f"hard bagging, alpha= 0.6",alpha=0.9)
+    plt.xlabel("M")
+    plt.xticks(M_grid)
+    plt.ylim(0.11,0.16)
+    plt.ylabel("normalized error")
+    plt.legend()
+    plt.show()
+
 #### actual vis
+
 def visualise_stocks():
     s = MaxCallStochasticModel(1,6,[1/12,11/12])
     s.generate_samples()
@@ -232,4 +254,5 @@ if __name__ == "__main__":
     #vis_soft_bagging_scitas()
     #vis_extended_soft_bagging_scitas()
     #vis_aggregating_comparsion()
-    vis_deregularized_soft_bagging_comparison()
+    #vis_deregularized_soft_bagging_comparison()
+    vis_scitas_hard_bagging()
