@@ -40,7 +40,7 @@ def flatten_X(X):
     f = lambda x:x.T.flatten()
     return np.array([f(x) for x in X])
 
-def generate_V_0(N,Delta,d):
+def generate_V_0(N,Delta,d,generator=MaxCallStochasticModel):
     """
     generate V_0 using dataset of specified shape
 
@@ -53,13 +53,13 @@ def generate_V_0(N,Delta,d):
     :return: V_0^
     :rtype: float
     """
-    s_v = MaxCallStochasticModel(N,d,Delta)
+    s_v = generator(N,d,Delta)
     s_v.generate_samples()
     V_0 = s_v.generate_true_V(0)
     V_0 = V_0.mean()
     return V_0
 
-def generate_train_set(N,Delta,d):
+def generate_train_set(N,Delta,d,generator=MaxCallStochasticModel):
     """
     generate trainset with specified shape
 
@@ -69,7 +69,7 @@ def generate_train_set(N,Delta,d):
     :return: X_train, y_train
     :rtype: np.ndarray, np.ndarray
     """
-    s_train = MaxCallStochasticModel(N,d,Delta)
+    s_train = generator(N,d,Delta)
     s_train.generate_samples()
     y_train = s_train.y
     X_train = flatten_X(s_train.X)
@@ -78,7 +78,7 @@ def generate_train_set(N,Delta,d):
     print(f"V_0_train of the set = {V_0}")
     return X_train, y_train
 
-def generate_test_set(N,Delta,d):
+def generate_test_set(N,Delta,d,generator=MaxCallStochasticModel):
     """
     generate trainset with specified shape
 
@@ -88,7 +88,7 @@ def generate_test_set(N,Delta,d):
     :return: X_train, y_train
     :rtype: np.ndarray, np.ndarray
     """
-    s_test = MaxCallStochasticModel(N,d,Delta)
+    s_test = generator(N,d,Delta)
     s_test.generate_samples()
     y_test = s_test.y
     X_test = flatten_X(s_test.X)
@@ -139,6 +139,7 @@ def memory_efficient_predict(model, X, max_size = 20000):
     assert isinstance(model, GaussianProcessRegressor)
     if X.shape[0] > max_size:
         n = int(X.shape[0]/max_size)
+        print(f"split in {n} subsets for prediction")
         datasets = np.array_split(X,n)
         mu_list = []
         sigma_list = []

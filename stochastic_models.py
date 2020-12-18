@@ -141,6 +141,7 @@ class MinPutStochasticModel(StochasticModelBase):
 
     def __init__(self, N, d, delta_Ts):
         super().__init__(N, d, delta_Ts)
+        self.K = 1
 
     def _calculate_f(self):
         res = self.K - np.min( self.S[:,:,self.T],axis=1)

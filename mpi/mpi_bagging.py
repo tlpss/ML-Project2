@@ -19,7 +19,7 @@ from aggregating.gridsearch import evaluate_model
 from aggregating.models import SimpleBagger
 from aggregating.utils import normalized_error_VT, flatten_X, generate_V_0, generate_train_set, create_GPR
 from mpi.utils import generate_logger_MPI, trials_hard_prediction, write_results, generate_bagging_train_indices,train_and_evaluate, generate_test_sets, trials_soft_prediction
-from stochastic_models import MaxCallStochasticModel
+from stochastic_models import MaxCallStochasticModel, MinPutStochasticModel
 
 np.random.seed(2020)
 
@@ -27,6 +27,7 @@ LOGFILE = "logs/bagging.log"
 LOGLEVEL = logging.DEBUG
 WRITEBACK = True
 SOFTVOTING = False
+generator = MinPutStochasticModel
  
 class Config:
     """
@@ -81,8 +82,8 @@ logger.info(f"node with rank {rank}/{size} started")
 ## let the main task create the train & testsets
 if rank == 0:
     logger.info(f"creating train & testsets")
-    DataContainer.X_train, DataContainer.y_train = generate_train_set(Config.N_train, Config.Delta,Config.d)
-    DataContainer.X_test_list, DataContainer.y_test_list = generate_test_sets(Config.trials, Config.N_test,Config.Delta, Config.d)
+    DataContainer.X_train, DataContainer.y_train = generate_train_set(Config.N_train, Config.Delta,Config.d,generator)
+    DataContainer.X_test_list, DataContainer.y_test_list = generate_test_sets(Config.trials, Config.N_test,Config.Delta, Config.d,generator)
 
 
 ## broadcast the required data to all nodes
@@ -164,7 +165,7 @@ if rank == 0:
         predictions.append([result[0],result[1],bagging_predictions])
 
     ## compute the normalized error for all hyperparam runs & all trials
-    V_0  = generate_V_0(100000,Config.Delta,Config.d)
+    V_0  = generate_V_0(100000,Config.Delta,Config.d,generator)
     logger.info(f"V_0 = {V_0}")
     normalized_error_results = []
     for result in predictions:

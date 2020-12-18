@@ -59,7 +59,7 @@ def generate_bagging_train_indices(N_train,alpha,M):
         indices_list.append(indices)
     return indices_list
 
-def generate_test_sets(trials, N_test,Delta, d):
+def generate_test_sets(trials, N_test,Delta, d,generator=MaxCallStochasticModel):
     """
     generate #trials test sets of given dimensions using the util func in aggregating
     :return: X_test_lists, y_test_list of specified dimensions; stacked into a single numpy array (trials, N,Delta*d / 1)
@@ -68,7 +68,7 @@ def generate_test_sets(trials, N_test,Delta, d):
     y_test_list = []
 
     for _ in range(trials):
-        X_test,y_test =  generate_train_set(N_test,Delta,d)
+        X_test,y_test =  generate_train_set(N_test,Delta,d,generator)
         X_test_list.append(X_test)
         y_test_list.append(y_test)
 
