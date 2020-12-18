@@ -134,6 +134,22 @@ class MaxCallStochasticModel(StochasticModelBase):
         res[res < 0] = 0
         return res*np.exp(-self.r*self.T)
         
+class MinPutStochasticModel(StochasticModelBase):
+    """
+    European Min Put Option Portfolio
+    """
+
+    def __init__(self, N, d, delta_Ts):
+        super().__init__(N, d, delta_Ts)
+
+    def _calculate_f(self):
+        res = self.K - np.min( self.S[:,:,self.T],axis=1)
+        res[res < 0] = 0
+        return res*np.exp(-self.r*self.T)
+        
+
+
+
 if __name__ == "__main__":
         """
         example usage
